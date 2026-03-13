@@ -1,0 +1,17 @@
+Automobile Insurance System.
+
+The main entities would be
+  - Customer -> the one who applies or views the policies
+  - Policy -> the records of all types of policies
+  - Officer -> the one who manages the policy to a particular customer
+
+The policy can be categorized for different types of vehicles as
+  - Light Commercial Vehicles
+  - Intermediate Commercial Vehicles
+  - Heavy Commercial Vehicles
+
+Customer claims and payments can be separately handled.
+
+So, a customer will be able view, apply, review their policies. Accordingly the officer may approve or reject their customer's request.
+A variety of policies are provided as depending on the policy type as Third Party, Own Damage or Comprehensive.
+Each vehicle can categorised as LCV, ICV, HCV, which are differentiated through breakpoints such as max_load is 7, 12, 12+ respectively. 
