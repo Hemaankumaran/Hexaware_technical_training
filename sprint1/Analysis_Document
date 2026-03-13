@@ -12,6 +12,11 @@ The policy can be categorized for different types of vehicles as
 
 Customer claims and payments can be separately handled.
 
-So, a customer will be able view, apply, review their policies. Accordingly the officer may approve or reject their customer's request.
+Story -- 
+Customer is the starting point. A customer registers and gets linked to one or more policies. The customer must exist before any policy can be created.
+So, a customer will be able view, apply, review their policies. Accordingly the officer approves and manages their customer's request. One officer can handle many policies.
+
+Policy is the important component of the system. One customer can have multiple policies over time.
+It connects the customer and officer together, stores the insurance contract details like premium amount, coverage, start and end dates, and current status.
 A variety of policies are provided as depending on the policy type as Third Party, Own Damage or Comprehensive.
-Each vehicle can categorised as LCV, ICV, HCV, which are differentiated through breakpoints such as max_load is 7, 12, 12+ respectively. 
+Vehicle is directly tied to a policy. Each vehicle can categorised as LCV, ICV, HCV, which are differentiated through breakpoints such as max_load is 7, 12, 12+ respectively. 
