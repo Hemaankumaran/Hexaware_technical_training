@@ -1,0 +1,22 @@
+Automobile Insurance System.
+
+The main entities would be
+  - Customer -> the one who applies or views the policies
+  - Policy -> the records of all types of policies
+  - Officer -> the one who manages the policy to a particular customer
+
+The policy can be categorized for different types of vehicles as
+  - Light Commercial Vehicles
+  - Intermediate Commercial Vehicles
+  - Heavy Commercial Vehicles
+
+Customer claims and payments can be separately handled.
+
+Story -- 
+Customer is the starting point. A customer registers and gets linked to one or more policies. The customer must exist before any policy can be created.
+So, a customer will be able view, apply, review their policies. Accordingly the officer approves and manages their customer's request. One officer can handle many policies.
+
+Policy is the important component of the system. One customer can have multiple policies over time.
+It connects the customer and officer together, stores the insurance contract details like premium amount, coverage, start and end dates, and current status.
+A variety of policies are provided as depending on the policy type as Third Party, Own Damage or Comprehensive.
+Vehicle is directly tied to a policy. Each vehicle can categorised as LCV, ICV, HCV, which are differentiated through breakpoints such as max_load is 7, 12, 12+ respectively. 
