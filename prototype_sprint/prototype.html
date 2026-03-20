@@ -1,0 +1,2051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AutoShield – Insurance Management System</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet"/>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --primary: #0a3d91;
+    --primary-d: #072d6e;
+    --primary-l: #1a5fd8;
+    --accent: #f4a800;
+    --accent-l: #fff8e6;
+    --success: #0d9e6e;
+    --danger: #d63838;
+    --warning: #e87e1a;
+    --light: #f4f7fd;
+    --white: #ffffff;
+    --dark: #0b1e3d;
+    --gray: #6b7a99;
+    --border: #dce4f0;
+    --sidebar-w: 240px;
+    --topbar-h: 64px;
+    --card-radius: 14px;
+    --transition: all 0.22s cubic-bezier(.4,0,.2,1);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--light); color: var(--dark); min-height: 100vh; }
+  h1,h2,h3,h4,h5,.syne { font-family: 'Syne', sans-serif; }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #c0cfe8; border-radius: 3px; }
+
+  /* ===== PAGE SYSTEM ===== */
+  .page { display: none; }
+  .page.active { display: flex; flex-direction: column; min-height: 100vh; }
+
+  /* ==================== LOGIN PAGE ==================== */
+  #page-login {
+    background: linear-gradient(135deg, #0a3d91 0%, #072d6e 50%, #0b1e3d 100%);
+    align-items: center; justify-content: center; padding: 24px;
+    position: relative; overflow: hidden;
+  }
+  #page-login::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 20% 50%, rgba(26,95,216,0.35) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(244,168,0,0.15) 0%, transparent 50%);
+  }
+  .login-grid-bg {
+    position: absolute; inset: 0; opacity: 0.04;
+    background-image: linear-gradient(rgba(255,255,255,1) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .login-card {
+    background: rgba(255,255,255,0.97);
+    border-radius: 24px;
+    box-shadow: 0 32px 80px rgba(7,29,110,0.35), 0 0 0 1px rgba(255,255,255,0.15);
+    width: 100%; max-width: 440px;
+    position: relative; z-index: 2;
+    animation: slideUp 0.5s cubic-bezier(.4,0,.2,1) both;
+  }
+  .login-card-inner { padding: 48px 40px; }
+  .login-logo { display: flex; align-items: center; gap: 12px; margin-bottom: 32px; }
+  .login-logo-icon {
+    width: 48px; height: 48px; border-radius: 12px;
+    background: var(--primary); display: grid; place-items: center;
+    box-shadow: 0 4px 16px rgba(10,61,145,0.3);
+  }
+  .login-logo-icon i { color: var(--accent); font-size: 22px; }
+  .login-logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; color: var(--dark); line-height: 1; }
+  .login-logo-text span { font-size: 11px; font-weight: 400; color: var(--gray); display: block; font-family: 'DM Sans', sans-serif; margin-top: 2px; }
+  .login-title { font-size: 28px; font-weight: 700; color: var(--dark); margin-bottom: 6px; }
+  .login-sub { color: var(--gray); font-size: 14px; margin-bottom: 28px; }
+  .role-tabs { display: flex; gap: 8px; margin-bottom: 24px; background: var(--light); border-radius: 10px; padding: 4px; }
+  .role-tab {
+    flex: 1; padding: 9px; border-radius: 8px; border: none;
+    background: transparent; font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500; color: var(--gray);
+    cursor: pointer; transition: var(--transition);
+  }
+  .role-tab.active { background: var(--white); color: var(--primary); font-weight: 600; box-shadow: 0 1px 6px rgba(0,0,0,0.1); }
+  .form-label { font-size: 13px; font-weight: 600; color: var(--dark); margin-bottom: 6px; }
+  .form-control, .form-select {
+    border: 1.5px solid var(--border); border-radius: 10px;
+    padding: 11px 14px; font-size: 14px; font-family: 'DM Sans', sans-serif;
+    transition: var(--transition); background: var(--white);
+  }
+  .form-control:focus, .form-select:focus {
+    border-color: var(--primary-l); box-shadow: 0 0 0 3px rgba(26,95,216,0.12);
+    outline: none;
+  }
+  .btn-login {
+    width: 100%; padding: 13px; border: none; border-radius: 11px;
+    background: linear-gradient(135deg, var(--primary-l), var(--primary));
+    color: white; font-size: 15px; font-weight: 600;
+    font-family: 'Syne', sans-serif; cursor: pointer;
+    box-shadow: 0 4px 18px rgba(10,61,145,0.3);
+    transition: var(--transition); letter-spacing: 0.3px;
+  }
+  .btn-login:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(10,61,145,0.4); }
+  .login-footer { text-align: center; margin-top: 20px; font-size: 13px; color: var(--gray); }
+  .login-footer a { color: var(--primary); font-weight: 600; cursor: pointer; text-decoration: none; }
+
+  /* ==================== REGISTER PAGE ==================== */
+  #page-register {
+    background: linear-gradient(135deg, #0a3d91 0%, #072d6e 50%, #0b1e3d 100%);
+    align-items: center; justify-content: center; padding: 24px;
+    position: relative; overflow: hidden;
+  }
+  #page-register::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 80% 50%, rgba(26,95,216,0.35) 0%, transparent 60%),
+                radial-gradient(ellipse at 20% 80%, rgba(244,168,0,0.1) 0%, transparent 50%);
+  }
+  #page-register .login-grid-bg { position: absolute; inset: 0; opacity: 0.04; background-image: linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px); background-size: 40px 40px; }
+  .register-card {
+    background: rgba(255,255,255,0.97); border-radius: 24px;
+    box-shadow: 0 32px 80px rgba(7,29,110,0.35);
+    width: 100%; max-width: 520px; position: relative; z-index: 2;
+    animation: slideUp 0.5s cubic-bezier(.4,0,.2,1) both;
+  }
+  .register-card-inner { padding: 40px; }
+
+  /* ==================== APP LAYOUT ==================== */
+  .app-layout { display: flex; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: var(--sidebar-w); background: var(--dark);
+    display: flex; flex-direction: column;
+    position: fixed; top: 0; left: 0; bottom: 0; z-index: 100;
+    transition: var(--transition);
+  }
+  .sidebar-logo {
+    height: var(--topbar-h); display: flex; align-items: center;
+    padding: 0 20px; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+  .sidebar-logo-icon {
+    width: 36px; height: 36px; border-radius: 9px;
+    background: var(--primary-l); display: grid; place-items: center; flex-shrink: 0;
+  }
+  .sidebar-logo-icon i { color: var(--accent); font-size: 17px; }
+  .sidebar-logo-name { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px; color: white; }
+  .sidebar-section-title {
+    font-size: 10px; font-weight: 700; letter-spacing: 1.2px;
+    text-transform: uppercase; color: rgba(255,255,255,0.3);
+    padding: 20px 20px 6px;
+  }
+  .sidebar-nav { padding: 8px 10px; flex: 1; overflow-y: auto; }
+  .nav-item {
+    display: flex; align-items: center; gap: 11px;
+    padding: 10px 12px; border-radius: 9px; cursor: pointer;
+    transition: var(--transition); margin-bottom: 2px;
+    color: rgba(255,255,255,0.55); font-size: 14px; font-weight: 500;
+    text-decoration: none;
+  }
+  .nav-item i { font-size: 17px; width: 20px; text-align: center; flex-shrink: 0; }
+  .nav-item:hover { background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.9); }
+  .nav-item.active { background: var(--primary); color: white; box-shadow: 0 2px 12px rgba(10,61,145,0.4); }
+  .nav-item .nav-badge {
+    margin-left: auto; background: var(--accent); color: var(--dark);
+    font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 20px;
+  }
+  .sidebar-footer {
+    padding: 16px 10px; border-top: 1px solid rgba(255,255,255,0.07);
+  }
+  .sidebar-user {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 9px;
+    background: rgba(255,255,255,0.05); cursor: pointer;
+  }
+  .sidebar-avatar {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary-l), var(--accent));
+    display: grid; place-items: center; font-size: 13px;
+    font-weight: 700; color: white; flex-shrink: 0;
+  }
+  .sidebar-user-info { flex: 1; min-width: 0; }
+  .sidebar-user-name { font-size: 13px; font-weight: 600; color: white; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sidebar-user-role { font-size: 11px; color: rgba(255,255,255,0.4); }
+
+  /* MAIN CONTENT */
+  .main-content { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
+  .topbar {
+    height: var(--topbar-h); background: var(--white); border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; padding: 0 28px; gap: 16px;
+    position: sticky; top: 0; z-index: 50;
+  }
+  .topbar-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 18px; color: var(--dark); flex: 1; }
+  .topbar-actions { display: flex; align-items: center; gap: 10px; }
+  .topbar-btn {
+    width: 38px; height: 38px; border-radius: 9px; border: 1.5px solid var(--border);
+    background: var(--white); display: grid; place-items: center;
+    cursor: pointer; color: var(--gray); font-size: 17px; transition: var(--transition);
+  }
+  .topbar-btn:hover { border-color: var(--primary-l); color: var(--primary); }
+  .topbar-notif { position: relative; }
+  .notif-dot {
+    position: absolute; top: 6px; right: 6px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--danger); border: 1.5px solid var(--white);
+  }
+  .content-area { padding: 28px; flex: 1; }
+
+  /* SECTION PAGES inside app */
+  .section-page { display: none; }
+  .section-page.active { display: block; animation: fadeIn 0.3s ease; }
+
+  /* ==================== DASHBOARD ==================== */
+  .page-header { margin-bottom: 24px; }
+  .page-header h2 { font-size: 26px; font-weight: 700; color: var(--dark); margin-bottom: 4px; }
+  .page-header p { color: var(--gray); font-size: 14px; }
+
+  /* STAT CARDS */
+  .stat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+  .stat-card {
+    background: var(--white); border-radius: var(--card-radius);
+    padding: 22px; border: 1px solid var(--border);
+    position: relative; overflow: hidden; transition: var(--transition);
+  }
+  .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(10,61,145,0.1); }
+  .stat-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  }
+  .stat-card.blue::before { background: var(--primary); }
+  .stat-card.gold::before { background: var(--accent); }
+  .stat-card.green::before { background: var(--success); }
+  .stat-card.red::before { background: var(--danger); }
+  .stat-icon {
+    width: 44px; height: 44px; border-radius: 11px;
+    display: grid; place-items: center; font-size: 20px; margin-bottom: 14px;
+  }
+  .stat-icon.blue { background: rgba(10,61,145,0.1); color: var(--primary); }
+  .stat-icon.gold { background: rgba(244,168,0,0.12); color: var(--warning); }
+  .stat-icon.green { background: rgba(13,158,110,0.1); color: var(--success); }
+  .stat-icon.red { background: rgba(214,56,56,0.1); color: var(--danger); }
+  .stat-value { font-family: 'Syne', sans-serif; font-size: 30px; font-weight: 800; color: var(--dark); line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-size: 13px; color: var(--gray); font-weight: 500; margin-bottom: 10px; }
+  .stat-change { font-size: 12px; display: flex; align-items: center; gap: 4px; }
+  .stat-change.up { color: var(--success); }
+  .stat-change.down { color: var(--danger); }
+
+  /* RECENT ACTIVITY */
+  .dash-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+  .card-panel {
+    background: var(--white); border-radius: var(--card-radius);
+    border: 1px solid var(--border); overflow: hidden;
+  }
+  .card-panel-header {
+    padding: 18px 20px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-panel-header h5 { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--dark); margin: 0; }
+  .view-all { font-size: 13px; color: var(--primary-l); font-weight: 600; cursor: pointer; text-decoration: none; }
+
+  /* TABLE */
+  .data-table { width: 100%; border-collapse: collapse; }
+  .data-table th {
+    padding: 11px 16px; font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.8px; color: var(--gray);
+    background: var(--light); border-bottom: 1px solid var(--border); text-align: left;
+  }
+  .data-table td { padding: 13px 16px; font-size: 13.5px; border-bottom: 1px solid rgba(220,228,240,0.5); vertical-align: middle; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: var(--light); }
+
+  /* BADGES */
+  .badge-status {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;
+  }
+  .badge-status::before { content: ''; width: 6px; height: 6px; border-radius: 50%; }
+  .badge-active { background: rgba(13,158,110,0.1); color: var(--success); }
+  .badge-active::before { background: var(--success); }
+  .badge-pending { background: rgba(244,168,0,0.12); color: #b37800; }
+  .badge-pending::before { background: var(--accent); }
+  .badge-expired { background: rgba(214,56,56,0.1); color: var(--danger); }
+  .badge-expired::before { background: var(--danger); }
+  .badge-approved { background: rgba(10,61,145,0.1); color: var(--primary); }
+  .badge-approved::before { background: var(--primary); }
+
+  /* MINI ACTIVITY */
+  .activity-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 14px 20px; border-bottom: 1px solid rgba(220,228,240,0.5);
+  }
+  .activity-item:last-child { border-bottom: none; }
+  .activity-dot {
+    width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+    display: grid; place-items: center; font-size: 15px;
+  }
+  .activity-info { flex: 1; }
+  .activity-text { font-size: 13.5px; color: var(--dark); font-weight: 500; }
+  .activity-text span { color: var(--primary); font-weight: 600; }
+  .activity-time { font-size: 11.5px; color: var(--gray); margin-top: 2px; }
+
+  /* POLICY TYPE CHART */
+  .policy-type-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 20px; }
+  .pt-card {
+    border-radius: 12px; padding: 16px; text-align: center;
+    border: 1.5px solid var(--border); background: var(--light); transition: var(--transition);
+  }
+  .pt-card:hover { border-color: var(--primary-l); background: var(--primary-pale, #e8f0fe); }
+  .pt-card .pt-num { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; color: var(--primary); }
+  .pt-card .pt-label { font-size: 12px; color: var(--gray); font-weight: 500; margin-top: 2px; }
+  .pt-card .pt-icon { font-size: 22px; margin-bottom: 8px; }
+
+  /* ==================== SECTION CONTENT ==================== */
+  .section-header {
+    display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;
+  }
+  .section-header h3 { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; color: var(--dark); }
+  .section-header p { font-size: 13px; color: var(--gray); margin-top: 2px; }
+
+  .btn-primary-custom {
+    background: var(--primary); color: white; border: none;
+    padding: 10px 20px; border-radius: 10px; font-size: 14px;
+    font-weight: 600; cursor: pointer; display: inline-flex;
+    align-items: center; gap: 7px; transition: var(--transition);
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn-primary-custom:hover { background: var(--primary-l); transform: translateY(-1px); box-shadow: 0 4px 14px rgba(10,61,145,0.25); }
+  .btn-outline-custom {
+    background: transparent; color: var(--primary); border: 1.5px solid var(--primary);
+    padding: 9px 18px; border-radius: 10px; font-size: 14px;
+    font-weight: 600; cursor: pointer; display: inline-flex;
+    align-items: center; gap: 7px; transition: var(--transition);
+    font-family: 'DM Sans', sans-serif;
+  }
+  .btn-outline-custom:hover { background: var(--primary); color: white; }
+
+  .filter-bar {
+    background: var(--white); border-radius: 12px;
+    border: 1px solid var(--border); padding: 16px 20px;
+    display: flex; gap: 12px; align-items: center; margin-bottom: 16px; flex-wrap: wrap;
+  }
+  .search-box {
+    flex: 1; min-width: 200px; position: relative;
+  }
+  .search-box i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--gray); font-size: 15px; }
+  .search-box input {
+    width: 100%; padding: 9px 12px 9px 36px;
+    border: 1.5px solid var(--border); border-radius: 9px;
+    font-size: 14px; font-family: 'DM Sans', sans-serif;
+    background: var(--light); transition: var(--transition);
+  }
+  .search-box input:focus { outline: none; border-color: var(--primary-l); background: white; }
+
+  .table-card {
+    background: var(--white); border-radius: var(--card-radius);
+    border: 1px solid var(--border); overflow: hidden;
+  }
+  .table-card .table-head { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .table-card .table-head h5 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; margin: 0; color: var(--dark); }
+
+  .action-btn {
+    width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid var(--border);
+    background: var(--white); display: inline-grid; place-items: center;
+    cursor: pointer; color: var(--gray); font-size: 14px; transition: var(--transition);
+  }
+  .action-btn:hover { border-color: var(--primary-l); color: var(--primary); background: rgba(26,95,216,0.06); }
+  .action-btn.danger:hover { border-color: var(--danger); color: var(--danger); background: rgba(214,56,56,0.06); }
+
+  /* AVATAR CELL */
+  .cell-avatar { display: flex; align-items: center; gap: 10px; }
+  .mini-avatar {
+    width: 34px; height: 34px; border-radius: 50%; flex-shrink: 0;
+    display: grid; place-items: center; font-size: 12px;
+    font-weight: 700; color: white;
+  }
+  .cell-name { font-weight: 600; color: var(--dark); font-size: 14px; }
+  .cell-sub { font-size: 12px; color: var(--gray); }
+
+  /* VEHICLE CLASS BADGE */
+  .vehicle-class { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.5px; }
+  .vc-lcv { background: rgba(13,158,110,0.1); color: var(--success); }
+  .vc-icv { background: rgba(244,168,0,0.12); color: #b37800; }
+  .vc-hcv { background: rgba(214,56,56,0.1); color: var(--danger); }
+
+  /* POLICY TYPE */
+  .policy-type-badge { display: inline-block; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+  .pt-third { background: rgba(10,61,145,0.1); color: var(--primary); }
+  .pt-own { background: rgba(13,158,110,0.1); color: var(--success); }
+  .pt-comp { background: rgba(244,168,0,0.15); color: #8a6200; }
+
+  /* MODALS */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(7,29,110,0.35);
+    backdrop-filter: blur(4px); z-index: 200;
+    display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  .modal-overlay.open { display: flex; animation: fadeIn 0.2s ease; }
+  .modal-box {
+    background: var(--white); border-radius: 18px;
+    width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.2);
+    animation: slideUp 0.3s cubic-bezier(.4,0,.2,1);
+  }
+  .modal-header {
+    padding: 22px 26px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .modal-header h4 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 17px; margin: 0; color: var(--dark); }
+  .modal-close {
+    width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid var(--border);
+    background: transparent; cursor: pointer; display: grid; place-items: center;
+    color: var(--gray); font-size: 16px; transition: var(--transition);
+  }
+  .modal-close:hover { background: var(--light); color: var(--dark); }
+  .modal-body { padding: 24px 26px; }
+  .modal-footer { padding: 16px 26px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+
+  /* FORM ELEMENTS */
+  .form-group { margin-bottom: 16px; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-label-sm { font-size: 13px; font-weight: 600; color: var(--dark); margin-bottom: 6px; display: block; }
+  .form-input, .form-sel {
+    width: 100%; padding: 10px 13px; border: 1.5px solid var(--border);
+    border-radius: 9px; font-size: 14px; font-family: 'DM Sans', sans-serif;
+    background: var(--white); transition: var(--transition); color: var(--dark);
+  }
+  .form-input:focus, .form-sel:focus { outline: none; border-color: var(--primary-l); box-shadow: 0 0 0 3px rgba(26,95,216,0.1); }
+
+  /* INFO PILLS for customer detail */
+  .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .info-item { background: var(--light); border-radius: 10px; padding: 12px 14px; }
+  .info-item .info-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--gray); margin-bottom: 4px; }
+  .info-item .info-value { font-size: 14px; font-weight: 600; color: var(--dark); }
+
+  /* ALERT BANNER */
+  .alert-banner {
+    border-radius: 10px; padding: 13px 16px; margin-bottom: 16px;
+    display: flex; align-items: center; gap: 10px; font-size: 13.5px;
+  }
+  .alert-info { background: rgba(10,61,145,0.07); color: var(--primary); border: 1px solid rgba(10,61,145,0.15); }
+  .alert-success { background: rgba(13,158,110,0.07); color: var(--success); border: 1px solid rgba(13,158,110,0.15); }
+  .alert-warning { background: rgba(244,168,0,0.1); color: #8a6200; border: 1px solid rgba(244,168,0,0.2); }
+
+  /* PROGRESS */
+  .progress-bar-wrap { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; border-radius: 3px; background: var(--primary); transition: width 1s ease; }
+
+  /* ANIMATIONS */
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; } to { opacity: 1; }
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 991px) {
+    .stat-grid { grid-template-columns: 1fr 1fr; }
+    .dash-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 768px) {
+    .stat-grid { grid-template-columns: 1fr 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+
+  /* CUSTOMER VIEW specific */
+  .policy-card {
+    background: var(--white); border-radius: var(--card-radius);
+    border: 1px solid var(--border); padding: 20px; margin-bottom: 14px;
+    transition: var(--transition); position: relative;
+  }
+  .policy-card:hover { box-shadow: 0 6px 20px rgba(10,61,145,0.1); border-color: rgba(26,95,216,0.3); }
+  .policy-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+  .policy-id { font-size: 12px; color: var(--gray); font-weight: 600; }
+  .policy-premium { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--primary); }
+  .policy-premium span { font-size: 13px; font-weight: 400; color: var(--gray); font-family: 'DM Sans', sans-serif; }
+  .policy-meta { display: flex; gap: 16px; flex-wrap: wrap; }
+  .policy-meta-item { display: flex; align-items: center; gap: 5px; font-size: 13px; color: var(--gray); }
+  .policy-meta-item i { font-size: 14px; color: var(--primary-l); }
+  .policy-progress { margin-top: 14px; }
+  .policy-progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--gray); margin-bottom: 6px; }
+
+  /* EMPTY STATE */
+  .empty-state { text-align: center; padding: 48px 20px; color: var(--gray); }
+  .empty-state i { font-size: 40px; opacity: 0.3; margin-bottom: 12px; display: block; }
+  .empty-state p { font-size: 14px; }
+
+  /* TOAST */
+  .toast-container {
+    position: fixed; bottom: 24px; right: 24px; z-index: 999;
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .toast-msg {
+    background: var(--dark); color: white; padding: 12px 18px;
+    border-radius: 10px; font-size: 13.5px; font-weight: 500;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.2); animation: slideUp 0.3s ease;
+    display: flex; align-items: center; gap: 10px; min-width: 260px;
+  }
+  .toast-msg i { color: var(--accent); font-size: 16px; }
+
+</style>
+</head>
+<body>
+
+<!-- ==================== TOAST ==================== -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ====================================================
+     PAGE 1: LOGIN
+===================================================== -->
+<div id="page-login" class="page active">
+  <div class="login-grid-bg"></div>
+  <div class="login-card">
+    <div class="login-card-inner">
+      <div class="login-logo">
+        <div class="login-logo-icon"><i class="bi bi-shield-check"></i></div>
+        <div class="login-logo-text">AutoShield <span>Insurance Management System</span></div>
+      </div>
+      <div class="login-title">Welcome back</div>
+      <p class="login-sub">Sign in to your account to continue</p>
+
+      <div class="role-tabs">
+        <button class="role-tab active" onclick="setRole('customer',this)"><i class="bi bi-person me-1"></i>Customer</button>
+        <button class="role-tab" onclick="setRole('admin',this)"><i class="bi bi-shield-lock me-1"></i>Admin</button>
+      </div>
+
+      <div class="mb-3">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-control" id="loginEmail" placeholder="you@example.com" value="ravi@example.com"/>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-control" id="loginPass" placeholder="Enter password" value="••••••••"/>
+      </div>
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" id="rememberMe"/>
+          <label class="form-check-label" for="rememberMe" style="font-size:13px; color:var(--gray);">Remember me</label>
+        </div>
+        <a href="#" style="font-size:13px; color:var(--primary); font-weight:600;">Forgot password?</a>
+      </div>
+      <button class="btn-login" onclick="doLogin()">Sign In →</button>
+      <div class="login-footer">
+        Don't have an account? <a onclick="showPage('page-register')">Register here</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================
+     PAGE 2: REGISTER
+===================================================== -->
+<div id="page-register" class="page">
+  <div class="login-grid-bg"></div>
+  <div class="register-card">
+    <div class="register-card-inner">
+      <div class="login-logo">
+        <div class="login-logo-icon"><i class="bi bi-shield-check"></i></div>
+        <div class="login-logo-text">AutoShield <span>Create your account</span></div>
+      </div>
+      <h2 class="login-title">Register</h2>
+      <p class="login-sub mb-4">Fill in your details to get started as a customer</p>
+
+      <div class="form-row mb-3">
+        <div>
+          <label class="form-label">Full Name</label>
+          <input type="text" class="form-control" placeholder="Ravi Kumar"/>
+        </div>
+        <div>
+          <label class="form-label">Age</label>
+          <input type="number" class="form-control" placeholder="28"/>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Email Address</label>
+        <input type="email" class="form-control" placeholder="ravi@example.com"/>
+      </div>
+      <div class="form-row mb-3">
+        <div>
+          <label class="form-label">Contact Number</label>
+          <input type="text" class="form-control" placeholder="+91 98765 43210"/>
+        </div>
+        <div>
+          <label class="form-label">Driver's License No.</label>
+          <input type="text" class="form-control" placeholder="TN1234567"/>
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Address</label>
+        <input type="text" class="form-control" placeholder="123, Anna Nagar, Chennai"/>
+      </div>
+      <div class="form-row mb-4">
+        <div>
+          <label class="form-label">Password</label>
+          <input type="password" class="form-control" placeholder="••••••••"/>
+        </div>
+        <div>
+          <label class="form-label">Confirm Password</label>
+          <input type="password" class="form-control" placeholder="••••••••"/>
+        </div>
+      </div>
+
+      <button class="btn-login" onclick="showToast('Account created! Please login.'); showPage('page-login')">Create Account →</button>
+      <div class="login-footer">
+        Already have an account? <a onclick="showPage('page-login')">Sign in</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================
+     PAGE 3: CUSTOMER DASHBOARD
+===================================================== -->
+<div id="page-customer" class="page">
+  <div class="app-layout">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon"><i class="bi bi-shield-check"></i></div>
+        <span class="sidebar-logo-name">AutoShield</span>
+      </div>
+      <div class="sidebar-nav">
+        <div class="sidebar-section-title">Menu</div>
+        <a class="nav-item active" onclick="switchSection('cust-dashboard',this)">
+          <i class="bi bi-grid-1x2"></i> Dashboard
+        </a>
+        <a class="nav-item" onclick="switchSection('cust-policies',this)">
+          <i class="bi bi-file-earmark-text"></i> My Policies
+          <span class="nav-badge">3</span>
+        </a>
+        <a class="nav-item" onclick="switchSection('cust-vehicles',this)">
+          <i class="bi bi-truck"></i> My Vehicles
+        </a>
+        <a class="nav-item" onclick="switchSection('cust-profile',this)">
+          <i class="bi bi-person-circle"></i> My Profile
+        </a>
+      </div>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar">RK</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name">Ravi Kumar</div>
+            <div class="sidebar-user-role">Customer</div>
+          </div>
+          <i class="bi bi-box-arrow-right" style="color:rgba(255,255,255,0.3);cursor:pointer" onclick="showPage('page-login')"></i>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-title" id="custTopTitle">Dashboard</div>
+        <div class="topbar-actions">
+          <div class="topbar-btn topbar-notif">
+            <i class="bi bi-bell"></i>
+            <div class="notif-dot"></div>
+          </div>
+          <button class="btn-primary-custom" onclick="openModal('applyPolicyModal')">
+            <i class="bi bi-plus-lg"></i> Apply for Policy
+          </button>
+        </div>
+      </div>
+
+      <div class="content-area">
+
+        <!-- CUSTOMER DASHBOARD HOME -->
+        <div class="section-page active" id="cust-dashboard">
+          <div class="page-header">
+            <h2>Good morning, Ravi! 👋</h2>
+            <p>Here's an overview of your insurance portfolio</p>
+          </div>
+
+          <div class="stat-grid">
+            <div class="stat-card blue">
+              <div class="stat-icon blue"><i class="bi bi-file-earmark-check"></i></div>
+              <div class="stat-value">3</div>
+              <div class="stat-label">Active Policies</div>
+              <div class="stat-change up"><i class="bi bi-arrow-up-short"></i> All valid</div>
+            </div>
+            <div class="stat-card gold">
+              <div class="stat-icon gold"><i class="bi bi-truck"></i></div>
+              <div class="stat-value">2</div>
+              <div class="stat-label">Registered Vehicles</div>
+              <div class="stat-change up"><i class="bi bi-arrow-up-short"></i> 1 LCV · 1 HCV</div>
+            </div>
+            <div class="stat-card green">
+              <div class="stat-icon green"><i class="bi bi-currency-rupee"></i></div>
+              <div class="stat-value">₹42K</div>
+              <div class="stat-label">Total Premium Paid</div>
+              <div class="stat-change up"><i class="bi bi-check-circle"></i> No dues</div>
+            </div>
+            <div class="stat-card red">
+              <div class="stat-icon red"><i class="bi bi-calendar-x"></i></div>
+              <div class="stat-value">87d</div>
+              <div class="stat-label">Nearest Expiry</div>
+              <div class="stat-change down"><i class="bi bi-exclamation-circle"></i> Renew soon</div>
+            </div>
+          </div>
+
+          <!-- POLICIES QUICK VIEW -->
+          <div class="dash-grid">
+            <div>
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="syne m-0" style="font-size:16px;">My Policies</h5>
+                <a class="view-all" onclick="switchSection('cust-policies', document.querySelector('.nav-item:nth-child(2)'))">View All →</a>
+              </div>
+
+              <div class="policy-card">
+                <div class="policy-card-top">
+                  <div>
+                    <div class="policy-id">POL-2024-001</div>
+                    <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-top:3px;">Comprehensive Cover</div>
+                    <div style="font-size:12px;color:var(--gray);margin-top:2px;">TN-09-AB-1234 • Tata Ace (LCV)</div>
+                  </div>
+                  <div>
+                    <span class="badge-status badge-active">Active</span>
+                    <div class="policy-premium mt-2">₹8,500 <span>/yr</span></div>
+                  </div>
+                </div>
+                <div class="policy-meta">
+                  <div class="policy-meta-item"><i class="bi bi-calendar3"></i> 12 Jan 2024 – 11 Jan 2025</div>
+                  <div class="policy-meta-item"><i class="bi bi-person-badge"></i> Officer: Arjun S.</div>
+                </div>
+                <div class="policy-progress">
+                  <div class="policy-progress-label"><span>Policy duration</span><span>73% elapsed</span></div>
+                  <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:73%;"></div></div>
+                </div>
+              </div>
+
+              <div class="policy-card">
+                <div class="policy-card-top">
+                  <div>
+                    <div class="policy-id">POL-2024-007</div>
+                    <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;margin-top:3px;">Third Party Liability</div>
+                    <div style="font-size:12px;color:var(--gray);margin-top:2px;">TN-09-CD-5678 • Ashok Leyland (HCV)</div>
+                  </div>
+                  <div>
+                    <span class="badge-status badge-pending">Pending</span>
+                    <div class="policy-premium mt-2">₹15,200 <span>/yr</span></div>
+                  </div>
+                </div>
+                <div class="policy-meta">
+                  <div class="policy-meta-item"><i class="bi bi-calendar3"></i> 01 Mar 2024 – 28 Feb 2025</div>
+                  <div class="policy-meta-item"><i class="bi bi-person-badge"></i> Officer: Priya M.</div>
+                </div>
+                <div class="policy-progress">
+                  <div class="policy-progress-label"><span>Awaiting officer approval</span></div>
+                  <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:15%;background:var(--accent);"></div></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ACTIVITY + OFFICER -->
+            <div>
+              <div class="card-panel mb-3">
+                <div class="card-panel-header"><h5>Your Officer</h5></div>
+                <div style="padding:20px;">
+                  <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+                    <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-l));display:grid;place-items:center;font-size:18px;font-weight:700;color:white;flex-shrink:0;">AS</div>
+                    <div>
+                      <div style="font-weight:700;font-size:15px;color:var(--dark);">Arjun Sharma</div>
+                      <div style="font-size:12px;color:var(--gray);">Senior Insurance Officer</div>
+                      <div style="font-size:12px;color:var(--primary);margin-top:2px;"><i class="bi bi-telephone-fill"></i> +91 98765 10001</div>
+                    </div>
+                  </div>
+                  <div class="info-grid">
+                    <div class="info-item"><div class="info-label">Policies Handled</div><div class="info-value">2 of yours</div></div>
+                    <div class="info-item"><div class="info-label">Status</div><div class="info-value" style="color:var(--success);">Available</div></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-panel">
+                <div class="card-panel-header"><h5>Recent Activity</h5></div>
+                <div class="activity-item">
+                  <div class="activity-dot" style="background:rgba(13,158,110,0.1);color:var(--success);"><i class="bi bi-check-circle-fill"></i></div>
+                  <div class="activity-info">
+                    <div class="activity-text">Policy <span>POL-2024-001</span> payment confirmed</div>
+                    <div class="activity-time">Today, 10:24 AM</div>
+                  </div>
+                </div>
+                <div class="activity-item">
+                  <div class="activity-dot" style="background:rgba(244,168,0,0.12);color:var(--warning);"><i class="bi bi-clock-fill"></i></div>
+                  <div class="activity-info">
+                    <div class="activity-text">Policy <span>POL-2024-007</span> submitted for review</div>
+                    <div class="activity-time">Yesterday, 3:45 PM</div>
+                  </div>
+                </div>
+                <div class="activity-item">
+                  <div class="activity-dot" style="background:rgba(10,61,145,0.1);color:var(--primary);"><i class="bi bi-file-earmark-plus-fill"></i></div>
+                  <div class="activity-info">
+                    <div class="activity-text">New vehicle <span>TN-09-CD-5678</span> registered</div>
+                    <div class="activity-time">28 Feb 2024</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /cust-dashboard -->
+
+        <!-- CUSTOMER: MY POLICIES -->
+        <div class="section-page" id="cust-policies">
+          <div class="section-header">
+            <div>
+              <h3>My Policies</h3>
+              <p>All your insurance policies in one place</p>
+            </div>
+            <button class="btn-primary-custom" onclick="openModal('applyPolicyModal')">
+              <i class="bi bi-plus-lg"></i> Apply New Policy
+            </button>
+          </div>
+
+          <div class="alert-banner alert-info">
+            <i class="bi bi-info-circle-fill"></i>
+            POL-2024-007 is pending approval. Your officer will review it within 2 business days.
+          </div>
+
+          <!-- Policy Cards -->
+          <div class="policy-card">
+            <div class="policy-card-top">
+              <div>
+                <div class="policy-id">POL-2024-001</div>
+                <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-top:3px;">Comprehensive Cover</div>
+                <div style="font-size:13px;color:var(--gray);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap;">
+                  <span class="vehicle-class vc-lcv">LCV</span>
+                  <span>TN-09-AB-1234</span>
+                  <span>Tata Ace · Diesel</span>
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <span class="badge-status badge-active">Active</span>
+                <div class="policy-premium mt-2">₹8,500 <span>/yr</span></div>
+                <div style="font-size:12px;color:var(--gray);">Sum Insured: ₹4,00,000</div>
+              </div>
+            </div>
+            <div class="policy-meta mb-3">
+              <div class="policy-meta-item"><i class="bi bi-calendar3"></i> 12 Jan 2024 – 11 Jan 2025</div>
+              <div class="policy-meta-item"><i class="bi bi-person-badge"></i> Arjun Sharma</div>
+              <div class="policy-meta-item"><i class="bi bi-hash"></i> TXN-98761</div>
+            </div>
+            <div class="policy-progress">
+              <div class="policy-progress-label"><span>Validity Progress</span><span>73% elapsed · 87 days remaining</span></div>
+              <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:73%;"></div></div>
+            </div>
+          </div>
+
+          <div class="policy-card">
+            <div class="policy-card-top">
+              <div>
+                <div class="policy-id">POL-2024-007</div>
+                <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-top:3px;">Third Party Liability</div>
+                <div style="font-size:13px;color:var(--gray);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap;">
+                  <span class="vehicle-class vc-hcv">HCV</span>
+                  <span>TN-09-CD-5678</span>
+                  <span>Ashok Leyland · Diesel</span>
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <span class="badge-status badge-pending">Pending</span>
+                <div class="policy-premium mt-2">₹15,200 <span>/yr</span></div>
+                <div style="font-size:12px;color:var(--gray);">Sum Insured: ₹8,00,000</div>
+              </div>
+            </div>
+            <div class="policy-meta mb-3">
+              <div class="policy-meta-item"><i class="bi bi-calendar3"></i> 01 Mar 2024 – 28 Feb 2025</div>
+              <div class="policy-meta-item"><i class="bi bi-person-badge"></i> Priya Mehra</div>
+            </div>
+            <div class="policy-progress">
+              <div class="policy-progress-label"><span>Awaiting officer approval</span></div>
+              <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:15%;background:var(--accent);"></div></div>
+            </div>
+          </div>
+
+          <div class="policy-card">
+            <div class="policy-card-top">
+              <div>
+                <div class="policy-id">POL-2023-041</div>
+                <div style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-top:3px;">Own Damage</div>
+                <div style="font-size:13px;color:var(--gray);margin-top:3px;display:flex;gap:10px;flex-wrap:wrap;">
+                  <span class="vehicle-class vc-lcv">LCV</span>
+                  <span>TN-09-AB-1234</span>
+                  <span>Tata Ace · Diesel</span>
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <span class="badge-status badge-expired">Expired</span>
+                <div class="policy-premium mt-2">₹6,800 <span>/yr</span></div>
+              </div>
+            </div>
+            <div class="policy-meta">
+              <div class="policy-meta-item"><i class="bi bi-calendar3"></i> 12 Jan 2023 – 11 Jan 2024</div>
+              <div class="policy-meta-item"><i class="bi bi-person-badge"></i> Arjun Sharma</div>
+            </div>
+          </div>
+        </div><!-- /cust-policies -->
+
+        <!-- CUSTOMER: MY VEHICLES -->
+        <div class="section-page" id="cust-vehicles">
+          <div class="section-header">
+            <div><h3>My Vehicles</h3><p>Vehicles linked to your policies</p></div>
+            <button class="btn-primary-custom" onclick="openModal('addVehicleModal')">
+              <i class="bi bi-plus-lg"></i> Add Vehicle
+            </button>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <div class="card-panel">
+                <div style="padding:22px;">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+                    <div style="width:52px;height:52px;border-radius:12px;background:rgba(10,61,145,0.07);display:grid;place-items:center;font-size:24px;color:var(--primary);">
+                      <i class="bi bi-truck-front-fill"></i>
+                    </div>
+                    <span class="vehicle-class vc-lcv">LCV · max 7T</span>
+                  </div>
+                  <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:2px;">Tata Ace</div>
+                  <div style="font-size:13px;color:var(--gray);margin-bottom:16px;font-weight:600;">TN-09-AB-1234</div>
+                  <div class="info-grid">
+                    <div class="info-item"><div class="info-label">Owner</div><div class="info-value">Ravi Kumar</div></div>
+                    <div class="info-item"><div class="info-label">Fuel Type</div><div class="info-value">Diesel</div></div>
+                    <div class="info-item"><div class="info-label">Body Type</div><div class="info-value">Pick-up</div></div>
+                    <div class="info-item"><div class="info-label">Policy</div><div class="info-value" style="color:var(--primary);">POL-2024-001</div></div>
+                  </div>
+                  <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:flex;gap:8px;">
+                    <div style="font-size:12px;color:var(--gray);flex:1;"><i class="bi bi-check-circle-fill" style="color:var(--success);"></i> Fitness Expiry: 12 Jan 2026</div>
+                    <span class="badge-status badge-active">Insured</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="card-panel">
+                <div style="padding:22px;">
+                  <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;">
+                    <div style="width:52px;height:52px;border-radius:12px;background:rgba(214,56,56,0.07);display:grid;place-items:center;font-size:24px;color:var(--danger);">
+                      <i class="bi bi-truck-flatbed"></i>
+                    </div>
+                    <span class="vehicle-class vc-hcv">HCV · 12T+</span>
+                  </div>
+                  <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;margin-bottom:2px;">Ashok Leyland 1920</div>
+                  <div style="font-size:13px;color:var(--gray);margin-bottom:16px;font-weight:600;">TN-09-CD-5678</div>
+                  <div class="info-grid">
+                    <div class="info-item"><div class="info-label">Owner</div><div class="info-value">Ravi Kumar</div></div>
+                    <div class="info-item"><div class="info-label">Fuel Type</div><div class="info-value">Diesel</div></div>
+                    <div class="info-item"><div class="info-label">No. of Axles</div><div class="info-value">3</div></div>
+                    <div class="info-item"><div class="info-label">Policy</div><div class="info-value" style="color:var(--warning);">Pending</div></div>
+                  </div>
+                  <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:flex;gap:8px;">
+                    <div style="font-size:12px;color:var(--gray);flex:1;"><i class="bi bi-exclamation-triangle-fill" style="color:var(--warning);"></i> Permit: TP-09-HCV-0023</div>
+                    <span class="badge-status badge-pending">Pending</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /cust-vehicles -->
+
+        <!-- CUSTOMER: PROFILE -->
+        <div class="section-page" id="cust-profile">
+          <div class="section-header">
+            <div><h3>My Profile</h3><p>Manage your personal information</p></div>
+            <button class="btn-primary-custom"><i class="bi bi-pencil"></i> Edit Profile</button>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="card-panel" style="padding:28px;text-align:center;">
+                <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-l));display:grid;place-items:center;font-size:28px;font-weight:800;color:white;margin:0 auto 14px;box-shadow:0 6px 20px rgba(10,61,145,0.25);">RK</div>
+                <div style="font-family:'Syne',sans-serif;font-size:20px;font-weight:800;color:var(--dark);">Ravi Kumar</div>
+                <div style="font-size:13px;color:var(--gray);margin-top:3px;">Customer · ID #C-1042</div>
+                <div style="margin-top:14px;padding:10px;background:var(--light);border-radius:10px;font-size:13px;color:var(--primary);font-weight:600;"><i class="bi bi-shield-check"></i> 3 Active Policies</div>
+              </div>
+            </div>
+            <div class="col-md-8">
+              <div class="card-panel">
+                <div class="card-panel-header"><h5>Personal Details</h5></div>
+                <div style="padding:20px;">
+                  <div class="info-grid">
+                    <div class="info-item"><div class="info-label">Full Name</div><div class="info-value">Ravi Kumar</div></div>
+                    <div class="info-item"><div class="info-label">Age</div><div class="info-value">34 years</div></div>
+                    <div class="info-item"><div class="info-label">Email</div><div class="info-value">ravi@example.com</div></div>
+                    <div class="info-item"><div class="info-label">Contact</div><div class="info-value">+91 98765 43210</div></div>
+                    <div class="info-item" style="grid-column:span 2;"><div class="info-label">Address</div><div class="info-value">123, Anna Nagar, Chennai – 600040</div></div>
+                    <div class="info-item"><div class="info-label">License No.</div><div class="info-value">TN1234567</div></div>
+                    <div class="info-item"><div class="info-label">Member Since</div><div class="info-value">Jan 2023</div></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /cust-profile -->
+
+      </div>
+    </div>
+  </div>
+</div><!-- /page-customer -->
+
+<!-- ====================================================
+     PAGE 4: ADMIN DASHBOARD
+===================================================== -->
+<div id="page-admin" class="page">
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <div class="sidebar-logo-icon"><i class="bi bi-shield-check"></i></div>
+        <span class="sidebar-logo-name">AutoShield</span>
+      </div>
+      <div class="sidebar-nav">
+        <div class="sidebar-section-title">Overview</div>
+        <a class="nav-item active" onclick="adminSection('admin-dashboard',this)">
+          <i class="bi bi-grid-1x2"></i> Dashboard
+        </a>
+        <div class="sidebar-section-title">Management</div>
+        <a class="nav-item" onclick="adminSection('admin-customers',this)">
+          <i class="bi bi-people"></i> Customers
+          <span class="nav-badge">248</span>
+        </a>
+        <a class="nav-item" onclick="adminSection('admin-vehicles',this)">
+          <i class="bi bi-truck"></i> Vehicles
+        </a>
+        <a class="nav-item" onclick="adminSection('admin-policies',this)">
+          <i class="bi bi-file-earmark-text"></i> Policies
+          <span class="nav-badge">12</span>
+        </a>
+        <div class="sidebar-section-title">System</div>
+        <a class="nav-item" onclick="adminSection('admin-officers',this)">
+          <i class="bi bi-person-badge"></i> Officers
+        </a>
+      </div>
+      <div class="sidebar-footer">
+        <div class="sidebar-user">
+          <div class="sidebar-avatar" style="background:linear-gradient(135deg,var(--accent),#e87e1a);">AD</div>
+          <div class="sidebar-user-info">
+            <div class="sidebar-user-name">Admin User</div>
+            <div class="sidebar-user-role">System Administrator</div>
+          </div>
+          <i class="bi bi-box-arrow-right" style="color:rgba(255,255,255,0.3);cursor:pointer" onclick="showPage('page-login')"></i>
+        </div>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <div class="topbar">
+        <div class="topbar-title" id="adminTopTitle">Dashboard</div>
+        <div class="topbar-actions">
+          <div class="topbar-btn topbar-notif"><i class="bi bi-bell"></i><div class="notif-dot"></div></div>
+          <div class="topbar-btn"><i class="bi bi-gear"></i></div>
+          <button class="btn-primary-custom" onclick="openModal('addCustomerModal')"><i class="bi bi-plus-lg"></i> Add Customer</button>
+        </div>
+      </div>
+
+      <div class="content-area">
+
+        <!-- ADMIN DASHBOARD HOME -->
+        <div class="section-page active" id="admin-dashboard">
+          <div class="page-header">
+            <h2>Admin Dashboard</h2>
+            <p>System-wide overview · March 2024</p>
+          </div>
+
+          <div class="stat-grid">
+            <div class="stat-card blue">
+              <div class="stat-icon blue"><i class="bi bi-people-fill"></i></div>
+              <div class="stat-value">248</div>
+              <div class="stat-label">Total Customers</div>
+              <div class="stat-change up"><i class="bi bi-arrow-up-short"></i> +12 this month</div>
+            </div>
+            <div class="stat-card gold">
+              <div class="stat-icon gold"><i class="bi bi-file-earmark-check"></i></div>
+              <div class="stat-value">184</div>
+              <div class="stat-label">Active Policies</div>
+              <div class="stat-change up"><i class="bi bi-arrow-up-short"></i> +8 this week</div>
+            </div>
+            <div class="stat-card green">
+              <div class="stat-icon green"><i class="bi bi-truck"></i></div>
+              <div class="stat-value">312</div>
+              <div class="stat-label">Registered Vehicles</div>
+              <div class="stat-change up"><i class="bi bi-arrow-up-short"></i> LCV+ICV+HCV</div>
+            </div>
+            <div class="stat-card red">
+              <div class="stat-icon red"><i class="bi bi-clock-history"></i></div>
+              <div class="stat-value">12</div>
+              <div class="stat-label">Pending Approvals</div>
+              <div class="stat-change down"><i class="bi bi-exclamation-circle"></i> Needs action</div>
+            </div>
+          </div>
+
+          <div class="dash-grid">
+            <!-- RECENT POLICIES TABLE -->
+            <div class="card-panel">
+              <div class="card-panel-header">
+                <h5>Recent Policy Requests</h5>
+                <a class="view-all" onclick="adminSection('admin-policies',document.querySelector('#page-admin .nav-item:nth-child(5)'))">View All →</a>
+              </div>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Customer</th>
+                    <th>Policy Type</th>
+                    <th>Vehicle</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><div class="cell-avatar"><div class="mini-avatar" style="background:#0a3d91;">RK</div><div><div class="cell-name">Ravi Kumar</div><div class="cell-sub">POL-2024-007</div></div></div></td>
+                    <td><span class="policy-type-badge pt-third">Third Party</span></td>
+                    <td><span class="vehicle-class vc-hcv">HCV</span> TN-09-CD</td>
+                    <td><span class="badge-status badge-pending">Pending</span></td>
+                  </tr>
+                  <tr>
+                    <td><div class="cell-avatar"><div class="mini-avatar" style="background:#0d9e6e;">MS</div><div><div class="cell-name">Meena S.</div><div class="cell-sub">POL-2024-008</div></div></div></td>
+                    <td><span class="policy-type-badge pt-comp">Comprehensive</span></td>
+                    <td><span class="vehicle-class vc-icv">ICV</span> TN-14-FG</td>
+                    <td><span class="badge-status badge-pending">Pending</span></td>
+                  </tr>
+                  <tr>
+                    <td><div class="cell-avatar"><div class="mini-avatar" style="background:#e87e1a;">JP</div><div><div class="cell-name">Jagan P.</div><div class="cell-sub">POL-2024-006</div></div></div></td>
+                    <td><span class="policy-type-badge pt-own">Own Damage</span></td>
+                    <td><span class="vehicle-class vc-lcv">LCV</span> TN-21-HK</td>
+                    <td><span class="badge-status badge-active">Active</span></td>
+                  </tr>
+                  <tr>
+                    <td><div class="cell-avatar"><div class="mini-avatar" style="background:#d63838;">KR</div><div><div class="cell-name">Kumar R.</div><div class="cell-sub">POL-2024-005</div></div></div></td>
+                    <td><span class="policy-type-badge pt-third">Third Party</span></td>
+                    <td><span class="vehicle-class vc-hcv">HCV</span> TN-33-PP</td>
+                    <td><span class="badge-status badge-active">Active</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- POLICY TYPE STATS + ACTIVITY -->
+            <div>
+              <div class="card-panel mb-3">
+                <div class="card-panel-header"><h5>Vehicle Class Breakdown</h5></div>
+                <div class="policy-type-grid">
+                  <div class="pt-card">
+                    <div class="pt-icon">🚐</div>
+                    <div class="pt-num">128</div>
+                    <div class="pt-label">LCV<br/>≤ 7T</div>
+                  </div>
+                  <div class="pt-card">
+                    <div class="pt-icon">🚚</div>
+                    <div class="pt-num">96</div>
+                    <div class="pt-label">ICV<br/>7–12T</div>
+                  </div>
+                  <div class="pt-card">
+                    <div class="pt-icon">🚛</div>
+                    <div class="pt-num">88</div>
+                    <div class="pt-label">HCV<br/>12T+</div>
+                  </div>
+                </div>
+                <div style="padding:0 20px 16px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+                  <div style="text-align:center;font-size:12px;">
+                    <div class="progress-bar-wrap mb-1"><div class="progress-bar-fill" style="width:41%;background:var(--success);"></div></div>
+                    <span style="color:var(--success);">41%</span>
+                  </div>
+                  <div style="text-align:center;font-size:12px;">
+                    <div class="progress-bar-wrap mb-1"><div class="progress-bar-fill" style="width:31%;background:var(--accent);"></div></div>
+                    <span style="color:var(--warning);">31%</span>
+                  </div>
+                  <div style="text-align:center;font-size:12px;">
+                    <div class="progress-bar-wrap mb-1"><div class="progress-bar-fill" style="width:28%;background:var(--danger);"></div></div>
+                    <span style="color:var(--danger);">28%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card-panel">
+                <div class="card-panel-header"><h5>Recent Activity</h5></div>
+                <div class="activity-item">
+                  <div class="activity-dot" style="background:rgba(244,168,0,0.12);color:var(--warning);"><i class="bi bi-clock-fill"></i></div>
+                  <div class="activity-info">
+                    <div class="activity-text"><span>Ravi Kumar</span> applied for HCV policy</div>
+                    <div class="activity-time">Today, 9:15 AM</div>
+                  </div>
+                </div>
+                <div class="activity-item">
+                  <div class="activity-dot" style="background:rgba(13,158,110,0.1);color:var(--success);"><i class="bi bi-person-plus-fill"></i></div>
+                  <div class="activity-info">
+                    <div class="activity-text">New customer <span>Meena S.</span> registered</div>
+                    <div class="activity-time">Today, 8:30 AM</div>
+                  </div>
+                </div>
+                <div class="activity-item">
+                  <div class="activity-dot" style="background:rgba(10,61,145,0.1);color:var(--primary);"><i class="bi bi-check2-circle"></i></div>
+                  <div class="activity-info">
+                    <div class="activity-text"><span>Arjun Sharma</span> approved POL-2024-006</div>
+                    <div class="activity-time">Yesterday, 4:00 PM</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /admin-dashboard -->
+
+        <!-- ADMIN: CUSTOMERS -->
+        <div class="section-page" id="admin-customers">
+          <div class="section-header">
+            <div><h3>Customer Management</h3><p>All registered customers in the system</p></div>
+            <button class="btn-primary-custom" onclick="openModal('addCustomerModal')"><i class="bi bi-plus-lg"></i> Add Customer</button>
+          </div>
+
+          <div class="filter-bar">
+            <div class="search-box">
+              <i class="bi bi-search"></i>
+              <input type="text" placeholder="Search by name, email or license..."/>
+            </div>
+            <select class="form-input" style="width:auto;min-width:140px;">
+              <option>All Status</option>
+              <option>Active</option>
+              <option>Inactive</option>
+            </select>
+            <button class="btn-outline-custom"><i class="bi bi-funnel"></i> Filter</button>
+          </div>
+
+          <div class="table-card">
+            <div class="table-head">
+              <h5>Customers <span style="color:var(--gray);font-size:13px;font-weight:400;">(248 total)</span></h5>
+              <button class="btn-outline-custom" style="padding:7px 14px;font-size:13px;"><i class="bi bi-download"></i> Export</button>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Customer</th>
+                    <th>Contact</th>
+                    <th>License</th>
+                    <th>Policies</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><div class="cell-avatar"><div class="mini-avatar" style="background:#0a3d91;">RK</div><div><div class="cell-name">Ravi Kumar</div><div class="cell-sub">ravi@example.com · Age 34</div></div></div></td>
+                    <td>+91 98765 43210</td>
+                    <td><code style="font-size:12px;background:var(--light);padding:3px 8px;border-radius:5px;">TN1234567</code></td>
+                    <td><span style="font-weight:700;color:var(--primary);">3</span> policies</td>
+                    <td><span class="badge-status badge-active">Active</span></td>
+                    <td style="display:flex;gap:6px;">
+                      <button class="action-btn" title="View" onclick="openModal('viewCustomerModal')"><i class="bi bi-eye"></i></button>
+                      <button class="action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
+                      <button class="action-btn danger" title="Delete"><i class="bi bi-trash"></i></button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><div class="cell-avatar"><div class="mini-avatar" style="background:#0d9e6e;">MS</div><div><div class="cell-name">Meena Subramanian</div><div class="cell-sub">meena@mail.com · Age 29</div></div></div></td>
+                    <td>+91 87654 32100</td>
+                    <td><code style="font-size:12px;background:var(--light);padding:3px 8px;border-radius:5px;">TN8765432</code></td>
+                    <td><span style="font-weight:700;color:var(--primary);">1</span> policy</td>
+                    <td><span class="badge-status badge-pending">Pending</span></td>
+                    <td style="display:flex;gap:6px;">
+                      <button class="action-btn" title="View" onclick="openModal('viewCustomerModal')"><i class="bi bi-eye"></i></button>
+                      <button class="action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
+                      <button class="action-btn danger" title="Delete"><i class="bi bi-trash"></i></button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><div class="cell-avatar"><div class="mini-avatar" style="background:#e87e1a;">JP</div><div><div class="cell-name">Jagan Prabhu</div><div class="cell-sub">jagan@mail.com · Age 45</div></div></div></td>
+                    <td>+91 76543 21000</td>
+                    <td><code style="font-size:12px;background:var(--light);padding:3px 8px;border-radius:5px;">TN4321098</code></td>
+                    <td><span style="font-weight:700;color:var(--primary);">2</span> policies</td>
+                    <td><span class="badge-status badge-active">Active</span></td>
+                    <td style="display:flex;gap:6px;">
+                      <button class="action-btn" title="View" onclick="openModal('viewCustomerModal')"><i class="bi bi-eye"></i></button>
+                      <button class="action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
+                      <button class="action-btn danger" title="Delete"><i class="bi bi-trash"></i></button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><div class="cell-avatar"><div class="mini-avatar" style="background:#d63838;">KR</div><div><div class="cell-name">Kumar Rajan</div><div class="cell-sub">kumar@mail.com · Age 52</div></div></div></td>
+                    <td>+91 65432 10987</td>
+                    <td><code style="font-size:12px;background:var(--light);padding:3px 8px;border-radius:5px;">TN6543210</code></td>
+                    <td><span style="font-weight:700;color:var(--primary);">4</span> policies</td>
+                    <td><span class="badge-status badge-active">Active</span></td>
+                    <td style="display:flex;gap:6px;">
+                      <button class="action-btn" title="View" onclick="openModal('viewCustomerModal')"><i class="bi bi-eye"></i></button>
+                      <button class="action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
+                      <button class="action-btn danger" title="Delete"><i class="bi bi-trash"></i></button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td><div class="cell-avatar"><div class="mini-avatar" style="background:#6b7a99;">SP</div><div><div class="cell-name">Sathya Priya</div><div class="cell-sub">sathya@mail.com · Age 38</div></div></div></td>
+                    <td>+91 54321 09876</td>
+                    <td><code style="font-size:12px;background:var(--light);padding:3px 8px;border-radius:5px;">TN9012345</code></td>
+                    <td><span style="font-weight:700;color:var(--primary);">1</span> policy</td>
+                    <td><span class="badge-status badge-expired">Inactive</span></td>
+                    <td style="display:flex;gap:6px;">
+                      <button class="action-btn" title="View" onclick="openModal('viewCustomerModal')"><i class="bi bi-eye"></i></button>
+                      <button class="action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
+                      <button class="action-btn danger" title="Delete"><i class="bi bi-trash"></i></button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="padding:14px 20px;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);">
+              <span style="font-size:13px;color:var(--gray);">Showing 5 of 248 customers</span>
+              <div style="display:flex;gap:6px;">
+                <button class="action-btn"><i class="bi bi-chevron-left"></i></button>
+                <button class="action-btn" style="background:var(--primary);color:white;border-color:var(--primary);">1</button>
+                <button class="action-btn">2</button>
+                <button class="action-btn">3</button>
+                <button class="action-btn"><i class="bi bi-chevron-right"></i></button>
+              </div>
+            </div>
+          </div>
+        </div><!-- /admin-customers -->
+
+        <!-- ADMIN: VEHICLES -->
+        <div class="section-page" id="admin-vehicles">
+          <div class="section-header">
+            <div><h3>Vehicle Management</h3><p>All vehicles classified by LCV / ICV / HCV</p></div>
+            <button class="btn-primary-custom" onclick="openModal('addVehicleModal')"><i class="bi bi-plus-lg"></i> Register Vehicle</button>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-4">
+              <div class="stat-card green" style="cursor:pointer;" onclick="filterVehicle('LCV',this)">
+                <div class="stat-icon green"><i class="bi bi-truck-front"></i></div>
+                <div class="stat-value">128</div>
+                <div class="stat-label">Light Commercial (LCV)</div>
+                <div class="stat-change" style="color:var(--gray);">Max load ≤ 7T</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="stat-card gold" style="cursor:pointer;" onclick="filterVehicle('ICV',this)">
+                <div class="stat-icon gold"><i class="bi bi-truck"></i></div>
+                <div class="stat-value">96</div>
+                <div class="stat-label">Intermediate (ICV)</div>
+                <div class="stat-change" style="color:var(--gray);">Max load 7–12T</div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="stat-card red" style="cursor:pointer;" onclick="filterVehicle('HCV',this)">
+                <div class="stat-icon red"><i class="bi bi-truck-flatbed"></i></div>
+                <div class="stat-value">88</div>
+                <div class="stat-label">Heavy Commercial (HCV)</div>
+                <div class="stat-change" style="color:var(--gray);">Max load 12T+</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="filter-bar">
+            <div class="search-box">
+              <i class="bi bi-search"></i>
+              <input type="text" placeholder="Search by reg no., model or owner..."/>
+            </div>
+            <select class="form-input" id="vcFilter" style="width:auto;min-width:140px;" onchange="filterVehicleSelect(this.value)">
+              <option value="ALL">All Classes</option>
+              <option value="LCV">LCV</option>
+              <option value="ICV">ICV</option>
+              <option value="HCV">HCV</option>
+            </select>
+          </div>
+
+          <div class="table-card">
+            <div class="table-head"><h5>Registered Vehicles <span style="color:var(--gray);font-size:13px;font-weight:400;" id="vehicleCount">(312 total)</span></h5></div>
+            <div style="overflow-x:auto;">
+              <table class="data-table" id="vehicleTable">
+                <thead>
+                  <tr>
+                    <th>Reg. No.</th>
+                    <th>Model</th>
+                    <th>Owner</th>
+                    <th>Fuel</th>
+                    <th>Class</th>
+                    <th>Max Load</th>
+                    <th>Policy</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="vehicleBody">
+                  <tr data-class="LCV">
+                    <td><code style="font-size:12px;background:var(--light);padding:3px 8px;border-radius:5px;">TN-09-AB-1234</code></td>
+                    <td><div class="cell-name">Tata Ace</div><div class="cell-sub">Pick-up</div></td>
+                    <td>Ravi Kumar</td>
+                    <td>Diesel</td>
+                    <td><span class="vehicle-class vc-lcv">LCV</span></td>
+                    <td>5T</td>
+                    <td style="color:var(--success);font-weight:600;">POL-2024-001</td>
+                    <td style="display:flex;gap:6px;"><button class="action-btn"><i class="bi bi-eye"></i></button><button class="action-btn"><i class="bi bi-pencil"></i></button><button class="action-btn danger"><i class="bi bi-trash"></i></button></td>
+                  </tr>
+                  <tr data-class="HCV">
+                    <td><code style="font-size:12px;background:var(--light);padding:3px 8px;border-radius:5px;">TN-09-CD-5678</code></td>
+                    <td><div class="cell-name">Ashok Leyland 1920</div><div class="cell-sub">Trailer</div></td>
+                    <td>Ravi Kumar</td>
+                    <td>Diesel</td>
+                    <td><span class="vehicle-class vc-hcv">HCV</span></td>
+                    <td>19T</td>
+                    <td style="color:var(--warning);font-weight:600;">Pending</td>
+                    <td style="display:flex;gap:6px;"><button class="action-btn"><i class="bi bi-eye"></i></button><button class="action-btn"><i class="bi bi-pencil"></i></button><button class="action-btn danger"><i class="bi bi-trash"></i></button></td>
+                  </tr>
+                  <tr data-class="ICV">
+                    <td><code style="font-size:12px;background:var(--light);padding:3px 8px;border-radius:5px;">TN-14-FG-9012</code></td>
+                    <td><div class="cell-name">Eicher Pro 3015</div><div class="cell-sub">Cargo</div></td>
+                    <td>Meena Subramanian</td>
+                    <td>Diesel</td>
+                    <td><span class="vehicle-class vc-icv">ICV</span></td>
+                    <td>10T</td>
+                    <td style="color:var(--warning);font-weight:600;">Pending</td>
+                    <td style="display:flex;gap:6px;"><button class="action-btn"><i class="bi bi-eye"></i></button><button class="action-btn"><i class="bi bi-pencil"></i></button><button class="action-btn danger"><i class="bi bi-trash"></i></button></td>
+                  </tr>
+                  <tr data-class="LCV">
+                    <td><code style="font-size:12px;background:var(--light);padding:3px 8px;border-radius:5px;">TN-21-HK-3456</code></td>
+                    <td><div class="cell-name">Mahindra Bolero</div><div class="cell-sub">Pick-up</div></td>
+                    <td>Jagan Prabhu</td>
+                    <td>Diesel</td>
+                    <td><span class="vehicle-class vc-lcv">LCV</span></td>
+                    <td>6.5T</td>
+                    <td style="color:var(--success);font-weight:600;">POL-2024-006</td>
+                    <td style="display:flex;gap:6px;"><button class="action-btn"><i class="bi bi-eye"></i></button><button class="action-btn"><i class="bi bi-pencil"></i></button><button class="action-btn danger"><i class="bi bi-trash"></i></button></td>
+                  </tr>
+                  <tr data-class="HCV">
+                    <td><code style="font-size:12px;background:var(--light);padding:3px 8px;border-radius:5px;">TN-33-PP-7890</code></td>
+                    <td><div class="cell-name">TATA Prima 4928S</div><div class="cell-sub">Heavy Truck</div></td>
+                    <td>Kumar Rajan</td>
+                    <td>Diesel</td>
+                    <td><span class="vehicle-class vc-hcv">HCV</span></td>
+                    <td>28T</td>
+                    <td style="color:var(--success);font-weight:600;">POL-2024-005</td>
+                    <td style="display:flex;gap:6px;"><button class="action-btn"><i class="bi bi-eye"></i></button><button class="action-btn"><i class="bi bi-pencil"></i></button><button class="action-btn danger"><i class="bi bi-trash"></i></button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div><!-- /admin-vehicles -->
+
+        <!-- ADMIN: POLICIES -->
+        <div class="section-page" id="admin-policies">
+          <div class="section-header">
+            <div><h3>Policy Management</h3><p>Review, approve and manage all insurance policies</p></div>
+            <button class="btn-primary-custom" onclick="openModal('createPolicyModal')"><i class="bi bi-plus-lg"></i> Create Policy</button>
+          </div>
+
+          <div class="alert-banner alert-warning">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <strong>12 policies</strong> are awaiting your approval. Review and approve to activate coverage.
+          </div>
+
+          <div class="filter-bar">
+            <div class="search-box">
+              <i class="bi bi-search"></i>
+              <input type="text" placeholder="Search by policy ID, customer..."/>
+            </div>
+            <select class="form-input" style="width:auto;min-width:150px;">
+              <option>All Types</option>
+              <option>Third Party</option>
+              <option>Own Damage</option>
+              <option>Comprehensive</option>
+            </select>
+            <select class="form-input" style="width:auto;min-width:130px;">
+              <option>All Status</option>
+              <option>Active</option>
+              <option>Pending</option>
+              <option>Expired</option>
+            </select>
+          </div>
+
+          <div class="table-card">
+            <div class="table-head"><h5>All Policies</h5></div>
+            <div style="overflow-x:auto;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Policy ID</th>
+                    <th>Customer</th>
+                    <th>Type</th>
+                    <th>Vehicle</th>
+                    <th>Premium</th>
+                    <th>Sum Insured</th>
+                    <th>Expiry</th>
+                    <th>Officer</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td style="font-weight:700;color:var(--primary);">POL-2024-001</td>
+                    <td>Ravi Kumar</td>
+                    <td><span class="policy-type-badge pt-comp">Comprehensive</span></td>
+                    <td><span class="vehicle-class vc-lcv">LCV</span></td>
+                    <td style="font-weight:700;">₹8,500</td>
+                    <td>₹4,00,000</td>
+                    <td>11 Jan 2025</td>
+                    <td>Arjun S.</td>
+                    <td><span class="badge-status badge-active">Active</span></td>
+                    <td style="display:flex;gap:5px;"><button class="action-btn"><i class="bi bi-eye"></i></button><button class="action-btn"><i class="bi bi-pencil"></i></button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:700;color:var(--primary);">POL-2024-007</td>
+                    <td>Ravi Kumar</td>
+                    <td><span class="policy-type-badge pt-third">Third Party</span></td>
+                    <td><span class="vehicle-class vc-hcv">HCV</span></td>
+                    <td style="font-weight:700;">₹15,200</td>
+                    <td>₹8,00,000</td>
+                    <td>28 Feb 2025</td>
+                    <td>Priya M.</td>
+                    <td><span class="badge-status badge-pending">Pending</span></td>
+                    <td style="display:flex;gap:5px;">
+                      <button class="action-btn" style="color:var(--success);border-color:var(--success);" onclick="approvePol(this)" title="Approve"><i class="bi bi-check-lg"></i></button>
+                      <button class="action-btn danger" title="Reject"><i class="bi bi-x-lg"></i></button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:700;color:var(--primary);">POL-2024-008</td>
+                    <td>Meena S.</td>
+                    <td><span class="policy-type-badge pt-comp">Comprehensive</span></td>
+                    <td><span class="vehicle-class vc-icv">ICV</span></td>
+                    <td style="font-weight:700;">₹12,800</td>
+                    <td>₹6,00,000</td>
+                    <td>01 Mar 2025</td>
+                    <td>Arjun S.</td>
+                    <td><span class="badge-status badge-pending">Pending</span></td>
+                    <td style="display:flex;gap:5px;">
+                      <button class="action-btn" style="color:var(--success);border-color:var(--success);" onclick="approvePol(this)" title="Approve"><i class="bi bi-check-lg"></i></button>
+                      <button class="action-btn danger" title="Reject"><i class="bi bi-x-lg"></i></button>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:700;color:var(--primary);">POL-2024-006</td>
+                    <td>Jagan Prabhu</td>
+                    <td><span class="policy-type-badge pt-own">Own Damage</span></td>
+                    <td><span class="vehicle-class vc-lcv">LCV</span></td>
+                    <td style="font-weight:700;">₹6,200</td>
+                    <td>₹3,00,000</td>
+                    <td>15 Dec 2024</td>
+                    <td>Priya M.</td>
+                    <td><span class="badge-status badge-active">Active</span></td>
+                    <td style="display:flex;gap:5px;"><button class="action-btn"><i class="bi bi-eye"></i></button><button class="action-btn"><i class="bi bi-pencil"></i></button></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight:700;color:var(--primary);">POL-2023-041</td>
+                    <td>Ravi Kumar</td>
+                    <td><span class="policy-type-badge pt-own">Own Damage</span></td>
+                    <td><span class="vehicle-class vc-lcv">LCV</span></td>
+                    <td style="font-weight:700;">₹6,800</td>
+                    <td>₹3,50,000</td>
+                    <td>11 Jan 2024</td>
+                    <td>Arjun S.</td>
+                    <td><span class="badge-status badge-expired">Expired</span></td>
+                    <td style="display:flex;gap:5px;"><button class="action-btn"><i class="bi bi-eye"></i></button></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div><!-- /admin-policies -->
+
+        <!-- ADMIN: OFFICERS -->
+        <div class="section-page" id="admin-officers">
+          <div class="section-header">
+            <div><h3>Officers</h3><p>Officers who manage policies and customers</p></div>
+            <button class="btn-primary-custom"><i class="bi bi-plus-lg"></i> Add Officer</button>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-4">
+              <div class="card-panel" style="padding:24px;">
+                <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
+                  <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-l));display:grid;place-items:center;font-size:20px;font-weight:800;color:white;">AS</div>
+                  <div>
+                    <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;">Arjun Sharma</div>
+                    <div style="font-size:12px;color:var(--gray);">Senior Insurance Officer</div>
+                    <div style="font-size:12px;color:var(--primary);margin-top:2px;">ID: OFF-001</div>
+                  </div>
+                </div>
+                <div class="info-grid">
+                  <div class="info-item"><div class="info-label">Contact</div><div class="info-value" style="font-size:12px;">+91 98765 10001</div></div>
+                  <div class="info-item"><div class="info-label">Policies Handled</div><div class="info-value" style="color:var(--primary);">87</div></div>
+                </div>
+                <div style="margin-top:12px;display:flex;gap:7px;">
+                  <button class="btn-outline-custom" style="flex:1;padding:8px;font-size:12px;justify-content:center;"><i class="bi bi-pencil"></i> Edit</button>
+                  <button class="btn-primary-custom" style="flex:1;padding:8px;font-size:12px;justify-content:center;"><i class="bi bi-eye"></i> View</button>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card-panel" style="padding:24px;">
+                <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
+                  <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#0d9e6e,#06734f);display:grid;place-items:center;font-size:20px;font-weight:800;color:white;">PM</div>
+                  <div>
+                    <div style="font-family:'Syne',sans-serif;font-size:16px;font-weight:700;">Priya Mehra</div>
+                    <div style="font-size:12px;color:var(--gray);">Insurance Officer</div>
+                    <div style="font-size:12px;color:var(--primary);margin-top:2px;">ID: OFF-002</div>
+                  </div>
+                </div>
+                <div class="info-grid">
+                  <div class="info-item"><div class="info-label">Contact</div><div class="info-value" style="font-size:12px;">+91 91234 56789</div></div>
+                  <div class="info-item"><div class="info-label">Policies Handled</div><div class="info-value" style="color:var(--primary);">54</div></div>
+                </div>
+                <div style="margin-top:12px;display:flex;gap:7px;">
+                  <button class="btn-outline-custom" style="flex:1;padding:8px;font-size:12px;justify-content:center;"><i class="bi bi-pencil"></i> Edit</button>
+                  <button class="btn-primary-custom" style="flex:1;padding:8px;font-size:12px;justify-content:center;"><i class="bi bi-eye"></i> View</button>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="card-panel" style="padding:24px;border:2px dashed var(--border);display:grid;place-items:center;min-height:220px;cursor:pointer;" onclick="showToast('Add officer form coming soon!')">
+                <div style="text-align:center;color:var(--gray);">
+                  <i class="bi bi-plus-circle" style="font-size:32px;margin-bottom:10px;display:block;opacity:0.4;"></i>
+                  <div style="font-weight:600;font-size:14px;">Add New Officer</div>
+                  <div style="font-size:12px;margin-top:4px;">Click to add a new officer</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div><!-- /admin-officers -->
+
+      </div>
+    </div>
+  </div>
+</div><!-- /page-admin -->
+
+<!-- ==================== MODALS ==================== -->
+
+<!-- Apply Policy Modal -->
+<div class="modal-overlay" id="applyPolicyModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h4><i class="bi bi-file-earmark-plus me-2" style="color:var(--primary);"></i>Apply for New Policy</h4>
+      <button class="modal-close" onclick="closeModal('applyPolicyModal')"><i class="bi bi-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label-sm">Policy Type</label>
+        <select class="form-sel">
+          <option value="">Select policy type...</option>
+          <option>Third Party</option>
+          <option>Own Damage</option>
+          <option>Comprehensive</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label-sm">Select Vehicle</label>
+          <select class="form-sel">
+            <option>TN-09-AB-1234 (Tata Ace)</option>
+            <option>TN-09-CD-5678 (Ashok Leyland)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label-sm">Start Date</label>
+          <input type="date" class="form-input"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label-sm">Premium Amount (₹)</label>
+          <input type="number" class="form-input" placeholder="e.g. 8500"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label-sm">Sum Insured (₹)</label>
+          <input type="number" class="form-input" placeholder="e.g. 400000"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label-sm">Assigned Officer</label>
+        <select class="form-sel">
+          <option>Arjun Sharma (Senior Officer)</option>
+          <option>Priya Mehra (Officer)</option>
+        </select>
+      </div>
+      <div class="alert-banner alert-info mt-2">
+        <i class="bi bi-info-circle"></i>
+        Your application will be reviewed by the assigned officer within 2 business days.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline-custom" onclick="closeModal('applyPolicyModal')">Cancel</button>
+      <button class="btn-primary-custom" onclick="closeModal('applyPolicyModal');showToast('Policy application submitted!')"><i class="bi bi-send"></i> Submit Application</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Vehicle Modal -->
+<div class="modal-overlay" id="addVehicleModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h4><i class="bi bi-truck me-2" style="color:var(--primary);"></i>Register New Vehicle</h4>
+      <button class="modal-close" onclick="closeModal('addVehicleModal')"><i class="bi bi-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label-sm">Registration Number</label>
+          <input type="text" class="form-input" placeholder="TN-09-XX-0000"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label-sm">Model</label>
+          <input type="text" class="form-input" placeholder="e.g. Tata Ace"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label-sm">Owner Name</label>
+          <input type="text" class="form-input" placeholder="Full name"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label-sm">Fuel Type</label>
+          <select class="form-sel">
+            <option>Diesel</option>
+            <option>Petrol</option>
+            <option>CNG</option>
+            <option>Electric</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label-sm">Max Load (Tonnes)</label>
+          <input type="number" class="form-input" placeholder="e.g. 7" id="maxLoadInput" oninput="autoClassify()"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label-sm">Vehicle Class (Auto)</label>
+          <div class="form-input" id="classDisplay" style="background:var(--light);color:var(--gray);">Enter max load to auto-classify</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label-sm">Body Type</label>
+          <input type="text" class="form-input" placeholder="e.g. Pick-up, Cargo"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label-sm">Fitness Expiry</label>
+          <input type="date" class="form-input"/>
+        </div>
+      </div>
+      <div class="alert-banner alert-success mt-2">
+        <i class="bi bi-info-circle"></i>
+        LCV ≤ 7T &nbsp;|&nbsp; ICV 7–12T &nbsp;|&nbsp; HCV 12T+ — auto-classified by max load.
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline-custom" onclick="closeModal('addVehicleModal')">Cancel</button>
+      <button class="btn-primary-custom" onclick="closeModal('addVehicleModal');showToast('Vehicle registered successfully!')"><i class="bi bi-check-lg"></i> Register Vehicle</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Customer Modal -->
+<div class="modal-overlay" id="addCustomerModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h4><i class="bi bi-person-plus me-2" style="color:var(--primary);"></i>Add New Customer</h4>
+      <button class="modal-close" onclick="closeModal('addCustomerModal')"><i class="bi bi-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label-sm">Full Name</label>
+          <input type="text" class="form-input" placeholder="Customer name"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label-sm">Age</label>
+          <input type="number" class="form-input" placeholder="28"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label-sm">Email</label>
+          <input type="email" class="form-input" placeholder="email@example.com"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label-sm">Contact</label>
+          <input type="text" class="form-input" placeholder="+91 XXXXX XXXXX"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label-sm">Driver's License</label>
+          <input type="text" class="form-input" placeholder="TN1234567"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label-sm">Status</label>
+          <select class="form-sel"><option>Active</option><option>Inactive</option></select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label-sm">Address</label>
+        <input type="text" class="form-input" placeholder="Full address"/>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline-custom" onclick="closeModal('addCustomerModal')">Cancel</button>
+      <button class="btn-primary-custom" onclick="closeModal('addCustomerModal');showToast('Customer added successfully!')"><i class="bi bi-check-lg"></i> Add Customer</button>
+    </div>
+  </div>
+</div>
+
+<!-- View Customer Modal -->
+<div class="modal-overlay" id="viewCustomerModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h4><i class="bi bi-person me-2" style="color:var(--primary);"></i>Customer Details</h4>
+      <button class="modal-close" onclick="closeModal('viewCustomerModal')"><i class="bi bi-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:20px;padding:16px;background:var(--light);border-radius:12px;">
+        <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-l));display:grid;place-items:center;font-size:20px;font-weight:800;color:white;flex-shrink:0;">RK</div>
+        <div>
+          <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:700;">Ravi Kumar</div>
+          <div style="font-size:13px;color:var(--gray);">Customer ID: #C-1042</div>
+          <span class="badge-status badge-active" style="margin-top:4px;">Active</span>
+        </div>
+      </div>
+      <div class="info-grid">
+        <div class="info-item"><div class="info-label">Age</div><div class="info-value">34 years</div></div>
+        <div class="info-item"><div class="info-label">Contact</div><div class="info-value">+91 98765 43210</div></div>
+        <div class="info-item"><div class="info-label">Email</div><div class="info-value">ravi@example.com</div></div>
+        <div class="info-item"><div class="info-label">License No.</div><div class="info-value">TN1234567</div></div>
+        <div class="info-item" style="grid-column:span 2;"><div class="info-label">Address</div><div class="info-value">123, Anna Nagar, Chennai – 600040</div></div>
+        <div class="info-item"><div class="info-label">Total Policies</div><div class="info-value" style="color:var(--primary);">3 policies</div></div>
+        <div class="info-item"><div class="info-label">Vehicles</div><div class="info-value">2 registered</div></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline-custom" onclick="closeModal('viewCustomerModal')">Close</button>
+      <button class="btn-primary-custom" onclick="closeModal('viewCustomerModal');showToast('Navigating to policies...')"><i class="bi bi-file-earmark-text"></i> View Policies</button>
+    </div>
+  </div>
+</div>
+
+<!-- Create Policy Modal (Admin) -->
+<div class="modal-overlay" id="createPolicyModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h4><i class="bi bi-file-earmark-plus me-2" style="color:var(--primary);"></i>Create Policy</h4>
+      <button class="modal-close" onclick="closeModal('createPolicyModal')"><i class="bi bi-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label-sm">Customer</label>
+          <select class="form-sel"><option>Ravi Kumar</option><option>Meena S.</option><option>Jagan P.</option></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label-sm">Assigned Officer</label>
+          <select class="form-sel"><option>Arjun Sharma</option><option>Priya Mehra</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label-sm">Policy Type</label>
+          <select class="form-sel"><option>Third Party</option><option>Own Damage</option><option>Comprehensive</option></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label-sm">Vehicle</label>
+          <select class="form-sel"><option>TN-09-AB-1234</option><option>TN-09-CD-5678</option></select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label-sm">Premium (₹)</label>
+          <input type="number" class="form-input" placeholder="e.g. 12000"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label-sm">Sum Insured (₹)</label>
+          <input type="number" class="form-input" placeholder="e.g. 500000"/>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label-sm">Start Date</label>
+          <input type="date" class="form-input"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label-sm">Expiry Date</label>
+          <input type="date" class="form-input"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label-sm">Initial Status</label>
+        <select class="form-sel"><option>Active</option><option>Pending</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-outline-custom" onclick="closeModal('createPolicyModal')">Cancel</button>
+      <button class="btn-primary-custom" onclick="closeModal('createPolicyModal');showToast('Policy created successfully!')"><i class="bi bi-check-lg"></i> Create Policy</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== SCRIPTS ==================== -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+<script>
+  // ===== GLOBALS =====
+  let currentRole = 'customer';
+
+  // ===== PAGE NAVIGATION =====
+  function showPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    window.scrollTo(0,0);
+  }
+
+  function setRole(role, btn) {
+    currentRole = role;
+    document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    const emailInput = document.getElementById('loginEmail');
+    if (role === 'admin') {
+      emailInput.value = 'admin@autoshield.in';
+    } else {
+      emailInput.value = 'ravi@example.com';
+    }
+  }
+
+  function doLogin() {
+    const email = document.getElementById('loginEmail').value;
+    if (!email) { showToast('Please enter your email!'); return; }
+    if (currentRole === 'admin') {
+      showPage('page-admin');
+    } else {
+      showPage('page-customer');
+    }
+    showToast('Welcome back! You are logged in.');
+  }
+
+  // ===== SECTION SWITCHER (Customer) =====
+  function switchSection(sectionId, navEl) {
+    // sections
+    document.querySelectorAll('#page-customer .section-page').forEach(s => s.classList.remove('active'));
+    document.getElementById(sectionId).classList.add('active');
+    // nav items
+    document.querySelectorAll('#page-customer .nav-item').forEach(n => n.classList.remove('active'));
+    if (navEl) navEl.classList.add('active');
+    // topbar title
+    const titles = {
+      'cust-dashboard': 'Dashboard',
+      'cust-policies': 'My Policies',
+      'cust-vehicles': 'My Vehicles',
+      'cust-profile': 'My Profile'
+    };
+    document.getElementById('custTopTitle').textContent = titles[sectionId] || '';
+    window.scrollTo(0,0);
+  }
+
+  // ===== SECTION SWITCHER (Admin) =====
+  function adminSection(sectionId, navEl) {
+    document.querySelectorAll('#page-admin .section-page').forEach(s => s.classList.remove('active'));
+    document.getElementById(sectionId).classList.add('active');
+    document.querySelectorAll('#page-admin .nav-item').forEach(n => n.classList.remove('active'));
+    if (navEl) navEl.classList.add('active');
+    const titles = {
+      'admin-dashboard': 'Dashboard',
+      'admin-customers': 'Customer Management',
+      'admin-vehicles': 'Vehicle Management',
+      'admin-policies': 'Policy Management',
+      'admin-officers': 'Officers'
+    };
+    document.getElementById('adminTopTitle').textContent = titles[sectionId] || '';
+    window.scrollTo(0,0);
+  }
+
+  // ===== MODALS =====
+  function openModal(id) {
+    document.getElementById(id).classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  // Close on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', function(e) {
+      if (e.target === this) closeModal(this.id);
+    });
+  });
+
+  // ===== VEHICLE CLASSIFICATION =====
+  function autoClassify() {
+    const val = parseFloat(document.getElementById('maxLoadInput').value);
+    const display = document.getElementById('classDisplay');
+    if (isNaN(val) || val <= 0) {
+      display.textContent = 'Enter max load to auto-classify';
+      display.style.color = 'var(--gray)';
+      return;
+    }
+    let cls, color;
+    if (val <= 7) { cls = '🚐 LCV (Light Commercial)'; color = 'var(--success)'; }
+    else if (val <= 12) { cls = '🚚 ICV (Intermediate Commercial)'; color = 'var(--warning)'; }
+    else { cls = '🚛 HCV (Heavy Commercial)'; color = 'var(--danger)'; }
+    display.textContent = cls;
+    display.style.color = color;
+    display.style.fontWeight = '700';
+  }
+
+  function filterVehicle(cls, card) {
+    document.getElementById('vcFilter').value = cls;
+    filterVehicleSelect(cls);
+  }
+
+  function filterVehicleSelect(cls) {
+    const rows = document.querySelectorAll('#vehicleBody tr');
+    let count = 0;
+    rows.forEach(row => {
+      if (cls === 'ALL' || row.dataset.class === cls) {
+        row.style.display = '';
+        count++;
+      } else {
+        row.style.display = 'none';
+      }
+    });
+    document.getElementById('vehicleCount').textContent = cls === 'ALL'
+      ? '(312 total)'
+      : `(${count} ${cls} vehicles)`;
+  }
+
+  // ===== APPROVE POLICY =====
+  function approvePol(btn) {
+    const row = btn.closest('tr');
+    const statusCell = row.querySelector('.badge-status');
+    statusCell.className = 'badge-status badge-active';
+    statusCell.textContent = 'Active';
+    // Replace approve/reject with view/edit
+    btn.closest('td').innerHTML = '<button class="action-btn"><i class="bi bi-eye"></i></button><button class="action-btn"><i class="bi bi-pencil"></i></button>';
+    showToast('Policy approved and activated!');
+  }
+
+  // ===== TOAST =====
+  function showToast(msg, icon='bi-check-circle-fill') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = 'toast-msg';
+    toast.innerHTML = `<i class="bi ${icon}"></i> ${msg}`;
+    container.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(8px)'; toast.style.transition = 'all 0.3s'; }, 2800);
+    setTimeout(() => toast.remove(), 3200);
+  }
+
+  // ===== KEYBOARD ESC =====
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.modal-overlay.open').forEach(m => {
+        m.classList.remove('open');
+        document.body.style.overflow = '';
+      });
+    }
+  });
+</script>
+</body>
+</html>
