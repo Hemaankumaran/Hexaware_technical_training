@@ -11,6 +11,8 @@ import com.springboot.automobileinsurancesystem.model.Policy;
 import com.springboot.automobileinsurancesystem.repository.PolicyRepo;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.event.Level;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -21,10 +23,8 @@ import java.time.Year;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
-import static java.time.LocalTime.now;
-
+@Slf4j
 @Service
 @AllArgsConstructor
 public class PolicyService {
@@ -55,6 +55,7 @@ public class PolicyService {
         if(filterReqDto.policy_type() == null && filterReqDto.vehicle_class() == null)
             return List.of();
 
+        log.atLevel(Level.INFO).log("Dynamically searching for the policy..!");
         // if not null or blank assign to their enums
         PolicyType policyType = filterReqDto.policy_type() != null && !filterReqDto.policy_type().isBlank() ?
                 PolicyType.valueOf(filterReqDto.policy_type()): null;
@@ -99,7 +100,7 @@ public class PolicyService {
                 }).toList();
     }
 
-    private Map<String, BigDecimal> calculateInsuranceMathForSuggestion(BigDecimal price, Year year, Policy policy) {
+    public Map<String, BigDecimal> calculateInsuranceMathForSuggestion(BigDecimal price, Year year, Policy policy) {
         int age = Year.now().getValue() - year.getValue();
 
         // Depreciation Logic

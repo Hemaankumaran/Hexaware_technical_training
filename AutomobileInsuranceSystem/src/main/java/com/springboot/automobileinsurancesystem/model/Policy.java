@@ -26,17 +26,26 @@ public class Policy { // all fields are required, so no need of validations
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @NotNull
+    @NotBlank
     private String policy_name;
+    @NotNull
+    @NotBlank
     private String description;
+    @NotNull
     private BigDecimal base_premium;
+    @NotNull
     private BigDecimal sum_insured; // fixed plans
     // duplicate fields in policy, so we can update here, which does not disturb existing records of customers
+    @NotNull
     private int duration_years;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "vehicle_class")
     private VehicleClass vehicleClass;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "policy_type")
     private PolicyType policyType;

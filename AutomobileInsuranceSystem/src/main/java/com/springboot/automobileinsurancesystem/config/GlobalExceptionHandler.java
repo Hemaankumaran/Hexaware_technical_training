@@ -5,6 +5,8 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Path;
 import jakarta.validation.UnexpectedTypeException;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.event.Level;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,11 +22,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+        log.atLevel(Level.WARN).log("Something is fishy in the arguments provided! Check that out!");
         Map<String, Object> map = new HashMap<>();
         BindingResult bindingResult = e.getBindingResult(); // to hold error results
         List<FieldError> list = bindingResult.getFieldErrors();
@@ -36,17 +40,9 @@ public class GlobalExceptionHandler {
                 .body(map);
     }
 
-    @ExceptionHandler(UnexpectedTypeException.class)
-    public ResponseEntity<?> handleUnexpectedTypeException(UnexpectedTypeException e) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("message", e.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.EXPECTATION_FAILED)
-                .body(map);
-    }
-
     @ExceptionHandler(ResourceNotFoundException.class) // my exception
     public ResponseEntity<?> handleResourceNotFoundException(ResourceNotFoundException e){
+        log.atLevel(Level.WARN).log("Please check the id given!");
         Map<String, Object> map = new HashMap<>();
         map.put("message", e.getMessage());
         return ResponseEntity
@@ -65,6 +61,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ConstraintViolationException.class) // own method, but works!! (for validation exceptions)
     public ResponseEntity<?> handleConstraintViolationException(ConstraintViolationException e){
+        log.atLevel(Level.WARN).log("Please check the constraints, something requested is missing!");
+        log.atLevel(Level.INFO).log("Checkout the constraints and provide data accordingly..");
         Map<Path, Object> map = new HashMap<>();
         Set<ConstraintViolation<?>> set = e.getConstraintViolations();
         List<ConstraintViolation<?>> list = set.stream().toList();
@@ -72,16 +70,7 @@ public class GlobalExceptionHandler {
             map.put(error.getPropertyPath(), error.getMessage());
         }
         return ResponseEntity
-                .status(HttpStatus.EXPECTATION_FAILED)
-                .body(map);
-    }
-
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    public ResponseEntity<?> handleDataIntegrityViolationException(DataIntegrityViolationException e){
-        Map<String, Object> map = new HashMap<>();
-        map.put("message", e.getMostSpecificCause().getMessage());
-        return ResponseEntity
-                .status(HttpStatus.NOT_FOUND)
+                .status(HttpStatus.PRECONDITION_FAILED)
                 .body(map);
     }
 }

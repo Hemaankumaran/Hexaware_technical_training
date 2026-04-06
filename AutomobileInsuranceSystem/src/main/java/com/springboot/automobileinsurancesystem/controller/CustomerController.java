@@ -21,7 +21,7 @@ public class CustomerController { // add, customerSignUp, getAll, getById
 
     private final CustomerService customerService;
 
-    @PostMapping("/add") // Authenticated
+    @PostMapping("/add") // OFFICER, ADMIN // user_id will become null
     public ResponseEntity<Map<String, Object>> addCustomer(@Valid @RequestBody Customer customer){
         customerService.addCustomer(customer);
         Map<String, Object> map = new HashMap<>();
@@ -33,18 +33,20 @@ public class CustomerController { // add, customerSignUp, getAll, getById
     @PostMapping("/signup") // PermitAll
     public ResponseEntity<Map<String, Object>> addCustomerSignUp(@Valid @RequestBody CustomerSignUpDto customerSignUpDto){
         customerService.addCustomerSignUp(customerSignUpDto);
+        Map<String, Object> map = new HashMap<>();
+        map.put("message", "Welcome to automobile insurance!!");
         return ResponseEntity.status(HttpStatus.CREATED)
-                .build();
+                .body(map);
     }
 
-    @GetMapping("/get") // ADMIN
+    @GetMapping("/getall") // ADMIN
     public CustomerPageResDto getAllCustomers(@RequestParam(value = "size", required = false, defaultValue = "5")int size,
                                               @RequestParam(value = "page", required = false, defaultValue = "0")int page){
         return customerService.getAllCustomers(size, page);
     }
 
-//    @GetMapping("/get/{id}") // OFFICER, ADMIN
-//    public CustomerResDto getById(@PathVariable long id){
-//        return customerService.getById(id);
-//    }
+    @GetMapping("/get/{id}") // OFFICER, ADMIN
+    public CustomerResDto getById(@PathVariable long id){
+        return customerService.getById(id);
+    }
 }

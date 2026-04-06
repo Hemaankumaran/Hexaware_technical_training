@@ -1,5 +1,6 @@
 package com.springboot.automobileinsurancesystem.service;
 
+import com.springboot.automobileinsurancesystem.dto.OfficerResDto;
 import com.springboot.automobileinsurancesystem.dto.OfficerSignUpDto;
 import com.springboot.automobileinsurancesystem.enums.OfficerDesignation;
 import com.springboot.automobileinsurancesystem.enums.Role;
@@ -12,11 +13,14 @@ import com.springboot.automobileinsurancesystem.model.User;
 import com.springboot.automobileinsurancesystem.repository.OfficerRepo;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.event.Level;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class OfficerService {
@@ -44,22 +48,51 @@ public class OfficerService {
         officerRepo.save(officer);
     }
 
-    public Officer getById(long id) {
-        return officerRepo.findById(id)
+    public OfficerResDto getById(long id) {
+        Officer officer = officerRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Invalid officer id.."));
+        return OfficerMapper.toDto(officer);
     }
 
-    public List<Officer> getByCustomerId(String username) {
+    public List<OfficerResDto> getByCustomerId(String username) {
         // get customer by username
         Customer customer = customerService.getByUsername(username);
 
         // validate
         customerService.getById(customer.getId());
 
-        return officerRepo.getByCustomerId(customer.getId());
+        List<Officer> list = officerRepo.getByCustomerId(customer.getId());
+
+        return list.stream()
+                .map(OfficerMapper :: toDto).toList();
     }
 
-    public List<Officer> getByDesignation(OfficerDesignation designation) {
-        return officerRepo.getByDesignation(designation);
+    // Filter api
+    public List<OfficerResDto> getByDesignation(OfficerDesignation designation) {
+        List<Officer> list = officerRepo.getByDesignation(designation);
+
+        return list.stream()
+                .map(OfficerMapper :: toDto).toList();
+    }
+
+    public Officer getByUsername(String username) {
+        return officerRepo.getByUsername(username);
+    }
+
+    public void deleteOfficerById(Long officerId) {
+        // get obj
+        Officer officer = getByIdEntity(officerId);
+
+        log.atLevel(Level.WARN).log("Changing the status of officer to inactive..!");
+        // change to INACTIVE
+        officer.setOfficerDesignation(OfficerDesignation.INACTIVE);
+
+        // save
+        officerRepo.save(officer);
+    }
+
+    public Officer getByIdEntity(Long officerId) {
+        return officerRepo.findById(officerId)
+                .orElseThrow(() -> new ResourceNotFoundException("Invalid officer id.."));
     }
 }

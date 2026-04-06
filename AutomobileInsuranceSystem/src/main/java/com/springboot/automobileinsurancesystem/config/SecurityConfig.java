@@ -1,22 +1,14 @@
 package com.springboot.automobileinsurancesystem.config;
 
-import com.springboot.automobileinsurancesystem.service.UserService;
 import lombok.AllArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.ProviderManager;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -27,7 +19,7 @@ public class SecurityConfig {
     // remember you can call add(user) only from one place in whole project,
     // otherwise circular dependency
 
-    private final UserService userService;
+//    private final UserService userService;
     private final JwtFilter jwtFilter;
 
 //    @Bean
@@ -51,11 +43,9 @@ public class SecurityConfig {
 //    }
 
     @Bean
-    // ADMIN -> admin - admin
-    // OFFICER -> officer - officer
-    // OFFICER -> dhoni - dhoni
-    // OFFICER -> bumrah - bumrah
-    // CUSTOMER -> neg - neg
+    // ADMIN -> admin - admin, administrator - administrator
+    // OFFICER -> officer - officer, bumrah - bumrah
+    // CUSTOMER -> harry - potter, ron - ron
     public SecurityFilterChain bankingSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable) // disable csrf - Cross Site Request Forgery
@@ -75,6 +65,12 @@ public class SecurityConfig {
                         // claim
                         .requestMatchers(HttpMethod.POST,"/api/claim/add/{customerPolicyId}")
                                 .authenticated()
+                        .requestMatchers(HttpMethod.PUT,"/api/claim/update/status/{claimId}")
+                                .hasAuthority("OFFICER")
+                        .requestMatchers(HttpMethod.PUT,"/api/claim/approve/status/{claimId}/{damagePercent}/{deductible}")
+                                .hasAuthority("OFFICER")
+                        .requestMatchers(HttpMethod.PUT,"/api/claim/reject/{claimId}")
+                                .hasAuthority("OFFICER")
                         .requestMatchers(HttpMethod.GET,"/api/claim/get/{claimId}")
                                 .hasAnyAuthority("OFFICER", "ADMIN")
                         .requestMatchers(HttpMethod.GET,"/api/claim/get/status/{claimStatus}")
@@ -82,29 +78,31 @@ public class SecurityConfig {
 
                         // customer
                         .requestMatchers(HttpMethod.POST,"/api/customer/add")
-                                .authenticated()
+                                .hasAnyAuthority("OFFICER", "ADMIN")
                         .requestMatchers(HttpMethod.POST,"/api/customer/signup")
                                 .permitAll()
-                        .requestMatchers(HttpMethod.GET,"/api/customer/get")
+                        .requestMatchers(HttpMethod.GET,"/api/customer/getall")
                                 .hasAuthority("ADMIN")
-//                        .requestMatchers(HttpMethod.GET,"/api/customer/get/{id}")
-//                                .hasAnyAuthority("OFFICER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/customer/get/{id}")
+                                .hasAnyAuthority("OFFICER", "ADMIN")
 
                         // customer_policy
-                        .requestMatchers(HttpMethod.POST,"/api/customerpolicy/add/{policyId}/{customerId}/{officerId}/{vehicleId}")
+                        .requestMatchers(HttpMethod.POST,"/api/customerpolicy/add/admin/{policyId}/{customerId}/{officerId}/{vehicleId}")
                                 .hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.POST,"/api/customerpolicy/add/{policyId}/{officerId}/{vehicleId}")
                                 .hasAuthority("CUSTOMER")
-                        .requestMatchers(HttpMethod.PUT,"/api/customerpolicy/quote/{customerPolicyId}")
+                        .requestMatchers(HttpMethod.POST,"/api/customerpolicy/schedule/{inspectionDate}/{customerPolicyId}")
+                                .hasAuthority("CUSTOMER")
+                        .requestMatchers(HttpMethod.PUT,"/api/customerpolicy/update/officer/{customerPolicyId}/{officerId}")
+                                .hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.PUT,"/api/customerpolicy/update/status/{customerPolicyId}/{policyStatus}")
+                                .hasAnyAuthority("OFFICER", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT,"/api/customerpolicy/approve/{customerPolicyId}/{startDate}")
+                                .hasAuthority("OFFICER")
+                        .requestMatchers(HttpMethod.GET,"/api/customerpolicy/quote/{customerPolicyId}")
                                 .hasAnyAuthority("OFFICER", "ADMIN")
                         .requestMatchers(HttpMethod.GET,"/api/customerpolicy/get/customer/{customerId}")
                                 .authenticated()
-                        .requestMatchers(HttpMethod.PUT,"/api/customerpolicy/update/status/{customerPolicyId}/{policyStatus}")
-                                .hasAnyAuthority("OFFICER", "ADMIN")
-                        .requestMatchers(HttpMethod.PUT,"/api/customerpolicy/update/officer/{customerPolicyId}/{officerId}")
-                                .hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.PUT,"/api/customerpolicy/approve/{customerPolicyId}/{startDate}")
-                                .hasAuthority("OFFICER")
                         .requestMatchers(HttpMethod.DELETE,"/api/customerpolicy/delete/{customerPolicyId}")
                                 .hasAuthority("ADMIN")
 
@@ -127,12 +125,14 @@ public class SecurityConfig {
                                 .hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.POST,"/api/officer/signup")
                                 .authenticated()
-                        .requestMatchers(HttpMethod.GET,"/api/officer/get/{id}")
-                                .hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.GET,"/api/officer/get/customer")
                                 .hasAuthority("CUSTOMER")
                         .requestMatchers(HttpMethod.GET,"/api/officer/get/designation")
                                 .hasAnyAuthority("OFFICER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/api/officer/get/{id}")
+                                .hasAuthority("ADMIN") // keep here to avoid ghosting url path
+                        .requestMatchers(HttpMethod.PUT,"/api/officer/delete/{officerId}")
+                                .hasAuthority("ADMIN")
 
                         // payment
                         .requestMatchers(HttpMethod.POST,"/api/payment/add/{customerPolicyId}")
@@ -143,22 +143,24 @@ public class SecurityConfig {
                         // policy
                         .requestMatchers(HttpMethod.POST,"/api/policy/add")
                                 .hasAnyAuthority("OFFICER", "ADMIN")
-                        .requestMatchers(HttpMethod.GET,"/api/policy/get")
+                        .requestMatchers(HttpMethod.GET,"/api/policy/getall")
+                                .permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/policy/get/filter")
                                 .permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/policy/get/{policyId}")
                                 .authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/policy/get/filter")
-                                .permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/policy/suggestions")
                                 .permitAll()
 
                         // vehicle
                         .requestMatchers(HttpMethod.POST,"/api/vehicle/add")
                                 .authenticated()
-                        .requestMatchers(HttpMethod.GET,"/api/vehicle/get/{vehicleId}")
-                                .hasAnyAuthority("OFFICER", "ADMIN")
                         .requestMatchers(HttpMethod.GET,"/api/vehicle/get/customer")
                                 .hasAuthority("CUSTOMER")
+                        .requestMatchers(HttpMethod.GET,"/api/vehicle/get/{vehicleId}")
+                                .hasAnyAuthority("OFFICER", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE,"/api/vehicle/delete/{vehicleId}")
+                                .authenticated()
 
                         .anyRequest().permitAll() // Any API not listed above
                 );
@@ -218,3 +220,6 @@ because, before attempting to permitAll() in requestMatchers,
 it hits jwtFilter, so it checks for token, nothing, so 401
  */
 // AuthController
+
+// testing - mocking
+// logging

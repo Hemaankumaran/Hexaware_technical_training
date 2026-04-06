@@ -39,4 +39,14 @@ public class VehicleController { // add, getById, getByCustomerId
     public VehicleByCustomerDto getByCustomerId(Principal principal){
         return vehicleService.getByCustomerId(principal.getName());
     }
+
+    // if customer enters a wrong data
+    @DeleteMapping("/delete/{vehicleId}") // Authenticated
+    public ResponseEntity<Map<String, Object>> deleteById(@PathVariable Long vehicleId){
+        vehicleService.deleteById(vehicleId);
+        Map<String, Object> map = new HashMap<>();
+        map.put("message", "Vehicle deleted");
+        return ResponseEntity.status(HttpStatus.ACCEPTED)
+                .body(map);
+    }
 }

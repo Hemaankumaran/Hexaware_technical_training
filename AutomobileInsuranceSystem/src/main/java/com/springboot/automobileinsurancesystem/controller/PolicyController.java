@@ -4,8 +4,6 @@ import com.springboot.automobileinsurancesystem.dto.FilterReqDto;
 import com.springboot.automobileinsurancesystem.dto.PolicyPageResDto;
 import com.springboot.automobileinsurancesystem.dto.SuggestionReqDto;
 import com.springboot.automobileinsurancesystem.dto.SuggestionResDto;
-import com.springboot.automobileinsurancesystem.enums.PolicyType;
-import com.springboot.automobileinsurancesystem.enums.VehicleClass;
 import com.springboot.automobileinsurancesystem.model.Policy;
 import com.springboot.automobileinsurancesystem.service.PolicyService;
 import jakarta.validation.Valid;
@@ -35,7 +33,7 @@ public class PolicyController { // add, getAll, getById, getByFilter, getSuggest
     }
 
 
-    @GetMapping("/get") // permitAll
+    @GetMapping("/getall") // permitAll
     public PolicyPageResDto getAllPolicies(@RequestParam(value = "size", required = false, defaultValue = "5")int size,
                                            @RequestParam(value = "page", required = false, defaultValue = "0")int page){
         return policyService.getAllPolicies(size, page);
@@ -53,7 +51,7 @@ public class PolicyController { // add, getAll, getById, getByFilter, getSuggest
     }
 
     @GetMapping("/suggestions") // permitAll
-    public List<SuggestionResDto> getSuggestions(@RequestBody SuggestionReqDto suggestionReqDto) {
+    public List<SuggestionResDto> getSuggestions(@Valid @RequestBody SuggestionReqDto suggestionReqDto) {
         return policyService.getSuggestions(suggestionReqDto);
     }
 }

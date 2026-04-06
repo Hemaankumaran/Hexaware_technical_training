@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,10 +20,11 @@ public class PaymentController { // add, getById
 
     private final PaymentService paymentService;
 
-    @PostMapping("/add/{customerPolicyId}") // Authenticated
+    @PostMapping("/add/{customerPolicyId}") // Authenticated // status taken from upi, as success or failed
     public ResponseEntity<Map<String, Object>> addPayment(@Valid @RequestBody Payment payment,
-                                        @PathVariable Long customerPolicyId){
-        paymentService.addPayment(payment, customerPolicyId);
+                                                          @PathVariable Long customerPolicyId,
+                                                          Principal principal){
+        paymentService.addPayment(payment, customerPolicyId, principal.getName());
         Map<String, Object> map = new HashMap<>();
         map.put("message", "nice! payment added");
         return ResponseEntity.status(HttpStatus.CREATED)

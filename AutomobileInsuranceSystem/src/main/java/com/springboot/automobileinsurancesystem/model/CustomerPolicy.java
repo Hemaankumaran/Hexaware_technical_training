@@ -31,6 +31,7 @@ public class CustomerPolicy {
     @Column(name = "policy_status")
     private PolicyStatus policyStatus;
 
+    private LocalDate inspection_date;
     private LocalDate start_date; // cannot give Instant, needs approval
     private int no_of_years;
     private LocalDate expiry_date;

@@ -2,6 +2,7 @@ package com.springboot.automobileinsurancesystem.controller;
 
 import com.springboot.automobileinsurancesystem.dto.AdminReqDto;
 import com.springboot.automobileinsurancesystem.service.AdminService;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,7 +17,7 @@ public class AdminController {
     private final AdminService adminService;
 
     @PostMapping("/add") // permitAll
-    public void addAdmin(@RequestBody AdminReqDto adminReqDto){
+    public void addAdmin(@Valid @RequestBody AdminReqDto adminReqDto){
         adminService.addAdmin(adminReqDto);
     }
 }

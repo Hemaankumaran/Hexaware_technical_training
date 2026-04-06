@@ -20,7 +20,11 @@ public record CustomerSignUpDto(
         String license_number,
         String aadhaar_number,
         @Size(min = 3, max = 15)
+        @NotNull
+        @NotBlank
         String username,
+        @NotNull
+        @NotBlank
         String password
 ) {
 }

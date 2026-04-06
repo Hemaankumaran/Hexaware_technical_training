@@ -12,6 +12,8 @@ import com.springboot.automobileinsurancesystem.model.User;
 import com.springboot.automobileinsurancesystem.repository.CustomerRepo;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.event.Level;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class CustomerService {
@@ -34,6 +37,7 @@ public class CustomerService {
 
     public CustomerPageResDto getAllCustomers(int size, int page) {
         Pageable pageable = PageRequest.of(page, size);
+        log.atLevel(Level.INFO).log("Fetching all the customers..");
         Page<Customer> customerPage = customerRepo.findAll(pageable);
         List<CustomerResDto> list = customerPage.stream()
                 .map(CustomerMapper:: toDto)

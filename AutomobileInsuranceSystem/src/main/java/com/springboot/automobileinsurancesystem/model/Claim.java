@@ -26,8 +26,6 @@ public class Claim {
     @NotNull
     private LocalDate incident_date;
     private LocalDate claim_date; // when the ClaimStatus is APPROVED
-
-    @NotNull
     private BigDecimal claim_amt;
 
     @NotNull
@@ -35,7 +33,6 @@ public class Claim {
     @Column(length = 1000)
     private String claim_desc;
 
-    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "claim_status")
     private ClaimStatus claimStatus;

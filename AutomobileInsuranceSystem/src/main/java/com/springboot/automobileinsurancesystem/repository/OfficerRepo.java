@@ -21,4 +21,10 @@ public interface OfficerRepo extends JpaRepository<Officer, Long> {
             where o.officerDesignation = ?1
             """)
     List<Officer> getByDesignation(OfficerDesignation designation);
+
+    @Query("""
+            select o from Officer o
+            where o.user.username = ?1
+            """)
+    Officer getByUsername(String username);
 }

@@ -1,7 +1,6 @@
 package com.springboot.automobileinsurancesystem.repository;
 
 import com.springboot.automobileinsurancesystem.model.CustomerPolicy;
-import com.springboot.automobileinsurancesystem.model.Policy;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -14,4 +13,7 @@ public interface CustomerPolicyRepo extends JpaRepository<CustomerPolicy, Long> 
             where cp.customer.id = ?1
             """)
     List<CustomerPolicy> getByCustomerId(long customerId);
+
+    // this fetches faster than manual query
+    boolean existsByVehicleId(Long vehicleId);
 }

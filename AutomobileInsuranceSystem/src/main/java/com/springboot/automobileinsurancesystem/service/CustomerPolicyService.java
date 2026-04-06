@@ -9,6 +9,8 @@ import com.springboot.automobileinsurancesystem.mapper.CustomerPolicyMapper;
 import com.springboot.automobileinsurancesystem.model.*;
 import com.springboot.automobileinsurancesystem.repository.CustomerPolicyRepo;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.event.Level;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -17,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class CustomerPolicyService {
@@ -29,6 +32,8 @@ public class CustomerPolicyService {
     private final UserService userService;
 
     private Map<String, BigDecimal> calculateInsuranceMath(Vehicle vehicle, Policy policy) {
+        log.atLevel(Level.DEBUG).log("Entering idv calculation method..!");
+
         // 1. Calculate Age
         int currentYear = LocalDate.now().getYear();
         int age = currentYear - vehicle.getMfg_year().getValue();
@@ -49,6 +54,7 @@ public class CustomerPolicyService {
         results.put("sumInsured", calculatedSumInsured);
         results.put("premium", finalPremium);
 
+        log.atLevel(Level.INFO).log("Completed calculation of idv..");
         return results;
     }
 
@@ -56,7 +62,7 @@ public class CustomerPolicyService {
         // get all entities from their ids
         Policy policy = policyService.getById(policyId);
         Customer customer = customerService.getByIdEntity(customerId);
-        Officer officer = officerService.getById(officerId);
+        Officer officer = officerService.getByIdEntity(officerId);
         Vehicle vehicle = vehicleService.getByIdEntity(vehicleId);
 
         // IDV calculation
@@ -64,8 +70,8 @@ public class CustomerPolicyService {
         CustomerPolicy customerPolicy = new CustomerPolicy();
 
         // set missing fields
-        customerPolicy.setSum_insured(map.get("calculatedSumInsured"));
-        customerPolicy.setPremium(map.get("finalPremium"));
+        customerPolicy.setSum_insured(map.get("sumInsured"));
+        customerPolicy.setPremium(map.get("premium"));
         customerPolicy.setPolicyStatus(PolicyStatus.PROPOSAL_SUBMITTED);
         customerPolicy.setNo_of_years(policy.getDuration_years());
         customerPolicy.setCustomer(customer);
@@ -81,7 +87,7 @@ public class CustomerPolicyService {
         // get all entities from their ids
         Policy policy = policyService.getById(policyId);
         Customer customer = customerService.getByUsername(username);
-        Officer officer = officerService.getById(officerId);
+        Officer officer = officerService.getByIdEntity(officerId);
         Vehicle vehicle = vehicleService.getByIdEntity(vehicleId);
 
         // IDV calculation
@@ -89,8 +95,8 @@ public class CustomerPolicyService {
         CustomerPolicy customerPolicy = new CustomerPolicy();
 
         // set missing fields
-        customerPolicy.setSum_insured(map.get("calculatedSumInsured"));
-        customerPolicy.setPremium(map.get("finalPremium"));
+        customerPolicy.setSum_insured(map.get("sumInsured"));
+        customerPolicy.setPremium(map.get("premium"));
         customerPolicy.setPolicyStatus(PolicyStatus.PROPOSAL_SUBMITTED);
         customerPolicy.setNo_of_years(policy.getDuration_years());
 
@@ -136,7 +142,7 @@ public class CustomerPolicyService {
 
     public void updateOfficer(Long customerPolicyId, Long officerId) {
         CustomerPolicy customerPolicy = getByIdEntity(customerPolicyId);
-        Officer officer = officerService.getById(officerId);
+        Officer officer = officerService.getByIdEntity( officerId);
 
         customerPolicy.setOfficer(officer);
 
@@ -149,6 +155,7 @@ public class CustomerPolicyService {
         User user = (User) userService.loadUserByUsername(username);
 
         // only officer managing this user can access to approve
+        log.atLevel(Level.DEBUG).log("Checking officer permission to access this customer policy..");
         if(user.getRole().equals(Role.OFFICER)){
             if(customerPolicy.getOfficer().getUser().getId() != user.getId()){
                 throw new UpdatePermissionException("Officer is not assigned to this customer policy");
@@ -168,16 +175,37 @@ public class CustomerPolicyService {
 
     public void deleteById(long customerPolicyId) {
         // validate the id
-        getByIdEntity(customerPolicyId);
+        CustomerPolicy customerPolicy = getByIdEntity(customerPolicyId);
 
-        customerPolicyRepo.deleteById(customerPolicyId);
+        // active policy cannot be deleted
+        if(customerPolicy.getPolicyStatus() == PolicyStatus.ACTIVE)
+            throw new UpdatePermissionException("Cannot delete an ACTIVE policy.!!");
+
+        // set status as expired
+        customerPolicy.setPolicyStatus(PolicyStatus.EXPIRED);
+
+        customerPolicyRepo.save(customerPolicy);
     }
 
     public CustomerPolicy getQuote(Long customerPolicyId) {
-        // validate
-        CustomerPolicy customerPolicy = getByIdEntity(customerPolicyId);
+        return getByIdEntity(customerPolicyId);
+    }
 
-        return customerPolicyRepo.findById(customerPolicy.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Invalid id.."));
+    public void scheduleInspection(LocalDate inspectionDate, Long customerPolicyId, String username) {
+        // get the obj
+        CustomerPolicy customerPolicy = getByIdEntity(customerPolicyId);
+        Customer customer = customerService.getByUsername(username);
+
+        // check customer permission
+        if(customerPolicy.getCustomer().getUser().getId() != customer.getUser().getId()){
+            throw new UpdatePermissionException("Oh! I think this Policy doesn't belong to you!");
+        }
+
+        // assign date of inspection
+        customerPolicy.setInspection_date(inspectionDate);
+        customerPolicy.setPolicyStatus(PolicyStatus.INSPECTION_SCHEDULED);
+
+        // save it
+        customerPolicyRepo.save(customerPolicy);
     }
 }

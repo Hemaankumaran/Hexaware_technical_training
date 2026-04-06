@@ -23,11 +23,11 @@ public class CustomerPolicyController { // assignPolicyToCustomerByAdmin, buyPol
 
     private final CustomerPolicyService customerPolicyService;
 
-    @PostMapping("/add/{policyId}/{customerId}/{officerId}/{vehicleId}") // ADMIN
+    @PostMapping("/add/admin/{policyId}/{customerId}/{officerId}/{vehicleId}") // ADMIN
     public ResponseEntity<Map<String, Object>> assignPolicyToCustomerByAdmin(@PathVariable long policyId,
-                                       @PathVariable long customerId,
-                                       @PathVariable long officerId,
-                                       @PathVariable long vehicleId){
+                                                                             @PathVariable long customerId,
+                                                                             @PathVariable long officerId,
+                                                                             @PathVariable long vehicleId){
         customerPolicyService.assignPolicyToCustomerByAdmin(policyId, customerId, officerId, vehicleId);
         Map<String, Object> map = new HashMap<>();
         map.put("message", "nice! policy bought");
@@ -37,9 +37,9 @@ public class CustomerPolicyController { // assignPolicyToCustomerByAdmin, buyPol
 
     @PostMapping("/add/{policyId}/{officerId}/{vehicleId}") // CUSTOMER
     public ResponseEntity<Map<String, Object>> buyPolicyByCustomer(@PathVariable long policyId,
-                                                 Principal principal,
-                                                 @PathVariable long officerId,
-                                                 @PathVariable long vehicleId){
+                                                                   Principal principal,
+                                                                   @PathVariable long officerId,
+                                                                   @PathVariable long vehicleId){
         customerPolicyService.buyPolicyByCustomer(policyId, principal.getName(), officerId, vehicleId);
         Map<String, Object> map = new HashMap<>();
         map.put("message", "nice! policy bought");
@@ -47,32 +47,39 @@ public class CustomerPolicyController { // assignPolicyToCustomerByAdmin, buyPol
                 .body(map);
     }
 
-    // PolicyStatus: QUOTE_GENERATED
-    @GetMapping("/quote/{customerPolicyId}") // OFFICER, ADMIN
-    public CustomerPolicy getQuote(@PathVariable Long customerPolicyId){
-        return customerPolicyService.getQuote(customerPolicyId);
-    }
-
-    @GetMapping("/get/customer/{customerId}") // Authenticated
-    public List<CustomerPolicyResDto> getByCustomerId(@PathVariable long customerId){
-        return customerPolicyService.getByCustomerId(customerId);
-    }
-
-    @PutMapping("/update/status/{customerPolicyId}/{policyStatus}") // OFFICER, ADMIN
-    public ResponseEntity<Map<String, Object>> updatePolicyStatus(@PathVariable Long customerPolicyId,
-                                                @PathVariable PolicyStatus policyStatus,
-                                                Principal principal){ // evaluate officer
-        customerPolicyService.updatePolicyStatus(customerPolicyId, policyStatus, principal.getName());
+    // scheduling the inspection - date cannot be in past (handle in React)
+    @PostMapping("/schedule/{inspectionDate}/{customerPolicyId}") // CUSTOMER
+    public ResponseEntity<Map<String, Object>> scheduleInspection(@PathVariable LocalDate inspectionDate,
+                                                                  @PathVariable Long customerPolicyId,
+                                                                  Principal principal){
+        customerPolicyService.scheduleInspection(inspectionDate, customerPolicyId, principal.getName());
+        Map<String, Object> map = new HashMap<>();
+        map.put("message", "Inspection Scheduled!");
         return ResponseEntity
-                .status(HttpStatus.ACCEPTED).build();
+                .status(HttpStatus.ACCEPTED).body(map);
     }
 
+    // assign officer by Admin - if needed to reassign officer
     @PutMapping("/update/officer/{customerPolicyId}/{officerId}") // ADMIN
     public ResponseEntity<Map<String, Object>> assignOfficer(@PathVariable Long customerPolicyId,
-                                           @PathVariable Long officerId){
+                                                             @PathVariable Long officerId){
         customerPolicyService.updateOfficer(customerPolicyId, officerId);
+        Map<String, Object> map = new HashMap<>();
+        map.put("message", "Officer assigned!");
         return ResponseEntity
-                .status(HttpStatus.ACCEPTED).build();
+                .status(HttpStatus.ACCEPTED).body(map);
+    }
+
+    // inspection verified by officer - INSPECTION_COMPLETED / REJECTED
+    @PutMapping("/update/status/{customerPolicyId}/{policyStatus}") // OFFICER, ADMIN
+    public ResponseEntity<Map<String, Object>> updatePolicyStatus(@PathVariable Long customerPolicyId,
+                                                                  @PathVariable PolicyStatus policyStatus,
+                                                                  Principal principal){ // evaluate officer
+        customerPolicyService.updatePolicyStatus(customerPolicyId, policyStatus, principal.getName());
+        Map<String, Object> map = new HashMap<>();
+        map.put("message", "Policy Status Updated!");
+        return ResponseEntity
+                .status(HttpStatus.ACCEPTED).body(map);
     }
 
     // officer approves the policy
@@ -87,10 +94,23 @@ public class CustomerPolicyController { // assignPolicyToCustomerByAdmin, buyPol
                 .status(HttpStatus.ACCEPTED).body(map);
     }
 
+    // generate quote
+    @GetMapping("/quote/{customerPolicyId}") // OFFICER, ADMIN
+    public CustomerPolicy getQuote(@PathVariable Long customerPolicyId){
+        return customerPolicyService.getQuote(customerPolicyId);
+    }
+
+    @GetMapping("/get/customer/{customerId}") // Authenticated // even officers can view policies of customers
+    public List<CustomerPolicyResDto> getByCustomerId(@PathVariable long customerId){
+        return customerPolicyService.getByCustomerId(customerId);
+    }
+
     @DeleteMapping("/delete/{customerPolicyId}") // ADMIN
     public ResponseEntity<Map<String, Object>> deleteById(@PathVariable long customerPolicyId){
         customerPolicyService.deleteById(customerPolicyId);
+        Map<String, Object> map = new HashMap<>();
+        map.put("message", "nice! policy turned expired");
         return ResponseEntity
-                .status(HttpStatus.OK).build();
+                .status(HttpStatus.ACCEPTED).body(map);
     }
 }
